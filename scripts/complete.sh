@@ -8,58 +8,24 @@ XML_OUTPUT=$BASEDIR/xmloutput
 CSV_OUTPUT=$BASEDIR/csvoutput
 SCRIPTS_FOLDER=$BASEDIR/scripts
 
-
 if [ $# -lt 1 ]
     then
         echo "usage: complete.sh <most available id list>"
         exit 1
 fi
 
-# Get the new list of id, from the website
-cat $1 | sort -g | sed '/^$/d' > sortedidlist
-
-# Read the old list of id, make a diff with the new list, and see what ids are really new.
-echo "Crawling new list of id from declaration.gov.ge now..."
-./scripts/defineDeclarationIds.sh
-
-cat $OUTPUT/idlist | sort -g | sed '/^$/d' > sortednewidlist
-
-cp sortednewidlist newids
-
-comm -13 sortedidlist sortednewidlist > newids
-cp ./newids "$PATH_TO_SCRAPPER"/idlist
-
+# Get all the ids from declaration.gov.ge, and make a diff with the most available id list ($1), 
+# in order to define what are the new documents that have been posted, since the last time 
+# this script had run
+$SCRIPTS_FOLDER/defineNewIds.sh $1
 
 # Download the new PDFs, based on the really new ids.
-cd $PATH_TO_SCRAPPER
-if [ ! -d "$PDF_OUTPUT" ]; then
-    mkdir $PDF_OUTPUT
-    mkdir "$PDF_OUTPUT"/en
-    mkdir "$PDF_OUTPUT"/ka
-fi
-scrapy crawl declaration
-
-echo "PDF files available in: "$PATH_TO_SCRAPPER"/output"
-
-rm newids
-rm sortedidlist
-mv $1 "$1"backup
-mv sortednewidlist idlist
-rm "$1"backup
+$SCRIPTS_FOLDER/downloadpdf.sh
 
 # Once we have the PDF, we need to convert them into XML files
-cd $BASEDIR
-if [ ! -d "$XML_OUTPUT" ]; then
-    mkdir $XML_OUTPUT
-    mkdir "$XML_OUTPUT"/en
-    mkdir "$XML_OUTPUT"/ka
-fi
 $SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 
 # The XML files have been generated, we can now turn them into CSV files
-if [ ! -d "$CSV_OUTPUT" ]; then
-    mkdir $CSV_OUTPUT
-fi
-java -jar ./scripts/declarationXmlParsing.jar $SCRIPTS_FOLDER/CollectRealEstateTest.xquery $XML_OUTPUT $CSV_OUTPUT
+$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $CSV_OUTPUT
 
 

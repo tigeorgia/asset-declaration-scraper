@@ -25,6 +25,7 @@
 
 BASEDIR=$PWD
 PDFTOHTML=/usr/local/bin/pdftohtml
+XML_OUTPUT=$BASEDIR/xmloutput
 #PDFTOHTML=poppler-0.16.7/utils/pdftohtml
 #PDFTOHTML=/wherever/poppler-0.16.7/utils/pdftohtml
 #############################################################################
@@ -37,24 +38,39 @@ if [ -z "$2" ]; then
     echo "Need directory to write XML files to!"
     exit 2;
 fi
+
 PDF=$1
-HTML=$2
+XML_OUTPUT=$2
+
+if [ ! -d "$XML_OUTPUT" ]; then
+    mkdir $XML_OUTPUT
+    mkdir "$XML_OUTPUT"/en
+    mkdir "$XML_OUTPUT"/ka
+fi
+
+if [ ! -d "$XML_OUTPUT"/en ]; then
+    mkdir "$XML_OUTPUT"/en
+fi
+
+if [ ! -d "$XML_OUTPUT"/ka ]; then
+    mkdir "$XML_OUTPUT"/ka
+fi
 
 echo "Converting English documents"
 for f in `ls $PDF/en/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
-    $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $HTML/test.xml
-    cat $HTML/test.xml | grep -v '^<!DOCTYPE' > $HTML/en/$name.xml
+    $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
+    cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/en/$name.xml
     #break
 done
 echo "Converting Georgian documents"
 for f in `ls $PDF/ka/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
-    $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $HTML/test.xml
-    cat $HTML/test.xml | grep -v '^<!DOCTYPE' > $HTML/ka/$name.xml
+    $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
+    cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/ka/$name.xml
     #break
 done
-rm $HTML/test.xml
+rm $XML_OUTPUT/test.xml
 
