@@ -15,6 +15,15 @@ if [ ! -d "$PDF_OUTPUT" ]; then
     mkdir "$PDF_OUTPUT"/en
     mkdir "$PDF_OUTPUT"/ka
 fi
+
+if [ ! -d "$PDF_OUTPUT"/en ]; then
+    mkdir "$PDF_OUTPUT"/en
+fi
+
+if [ ! -d "$PDF_OUTPUT"/ka ]; then
+    mkdir "$PDF_OUTPUT"/ka
+fi
+
 scrapy crawl declaration
 
 echo "PDF files available in: "$PATH_TO_SCRAPPER"/output"

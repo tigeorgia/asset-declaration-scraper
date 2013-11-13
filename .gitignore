@@ -1,4 +1,4 @@
-*.pdf
-*.xml
-*.csv
+./declarationScrapy/output/*.pdf
+./xmloutput/*.xml
+./csvoutput/*.csv
 
