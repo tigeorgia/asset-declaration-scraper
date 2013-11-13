@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This file contains the strings on which the text-extractor is based.
+	The file is divided into q-elements, one for each question in the Asset Declaration PDF's (and question 0 for the information of the person who filed the AD
+	
+	Explanation:
+	n-attribute: unique ID of the question
+	t-attribute: name of the table belonging to this question
+	w-element: contains the complete text of the question.
+	h-elements: contain the complete text of the headers of the table, numbered, ordered in reading order (from left to right)
+	
+	The s-element part contains a  substring of the w or h text that is 
+		* long enough to provide a unique match
+		* short enough to fit in one text element.
+		Example: <h n='3'><s>Location of the property, total</s> area</h>
+			because in the XML we have 
+			<text top="107" left="644" width="257" height="17" font="5">
+			<b>Location of the property, total</b>
+			</text>
+	outcome-element specifies the output schema (that is, the names of the columns from left to right)
+	-->
+
+<AssetDeclarations>
+	<q n='0' t='ADheader'>
+		<w>Asset Declaration of Public Official</w>
+		<outschema>First_Name,Last_Name,Birth_Place,Birth_Date,Organisation_Position,Work_Address,Submission_Date</outschema>  <!-- $fnln,$birthplace,$birthdate, $org, $work, $submitDate  -->
+	</q>
+    <q n='1' t='ADfamily_relations'>
+        <w><s>Data about family members (spouse, children, other persons)</s></w>
+        <h n='1'><s>First Name </s></h>
+        <h n='2'><s>Last Name</s></h>
+        <h n='3'><s>Place of birth</s></h>
+        <h n='4'><s>Date of birth</s></h>
+        <h n='5'><s>Relationship</s></h>
+    	<outschema>First_Name,Last_Name,Birth_Place,Birth_Date,Family_relation</outschema>  
+    </q>
+	<q n='2' t='ADreal_estate'>
+	   <w><s>Do you or your family members own real estate?</s></w>
+		<!-- <h n='1'>Name of the owner of the </h>
+		<h n='2'>Type of property</h>
+		<h n='3'>Location of the property, total</h>
+		<h n='4'>If the property is in common</h>
+		-->
+	   <h n='1'><s>Name of the owner of the</s> property (if the property is in common possession, please indicate the share in percentages)</h>
+		<h n='2'><s>Type of property</s></h>
+		<h n='3'><s>Location of the property, total</s> area</h>
+	   <h n='4'><s>If the property is in common</s> possession, list all owners of the property, as well as their share in percentage</h>
+		 
+		<outschema>First_Name,Last_Name,Percentage,Property_Type,Property_Description,Area,Dimension,Common_Possesion</outschema> <!-- ($fnln,$percentage,$type,$propdescription,$area,$poss)  -->
+	</q>
+   
+	<q n='3' t='ADmovable_property'>
+       <w><s>Do you or your family members own any movable property</s> (except for cash, securities, bank deposits, etc.) valued at more than 10,000 GEL (6,100 USD approximately)?</w>
+       <h n='1'><s>Name of the owner of the</s> property (if the property is in common possession then indicate the shares in percentages)</h>
+	   <h n='2'><s>Type of the property</s></h>
+	   <h n='3'><s>Details of the ownership</s></h>
+	   <h n='4'><s>If the property is in common</s> possession, all owners shall be indicated (if the property is in common possession, shares in percentages should be indicated)</h>
+    </q>
+	<q n='4' t='ADsecurities'>
+	    <w><s>Do you or your family members own any securities?</s></w>
+		<h n='1'><s>Owner (first name</s>, last name)</h>
+		<h n='2'><s>Issuer of the securities</s></h>
+		<h n='3'><s>Type</s></h>
+		<h n='4'><s>Nominal value</s></h>
+		<h n='5'><s>Quantity</s></h>
+    </q>
+	
+	<q n='5' t='ADbank_accounts'>
+        <w><s>Do you or your family members have bank accounts in Georgian or foreign banks?</s></w>
+        <h n='1'><s>Bank account owner</s></h>
+		<h n='2'><s>Name of the bank</s> and/or other financial institution</h>
+		<h n='3'><s>Type of account and/or deposit</s></h>
+		<h n='4'><s>Amount of credit or debit</s> on the account</h>
+    </q>
+	<q n='6' t='ADcash'>
+	    <w><s>Do you or your family members hold cash valued at more than 4,000 GEL (2,400 USD approximately)?</s></w>
+	    <h n='1'><s>First name, last name of cash owner</s></h>
+	    <h n='2'><s>Amount of cash in the original currency</s></h>
+	</q>
+	<q n='7' t='ADentrepreneurial_activity'>
+	   <w><s>Have you or your family members undertaken any type of entrepreneurial activity?</s></w>
+	   <h n='1'><s>Name of person</s> involved in entrepreneurship activities</h>
+	   <h n='2'><s>Full name and legal</s> address of enterprise</h>
+	   <h n='3'><s>Form of partnership</s></h>
+	   <h n='4'><s>Registering body</s> and date of registration</h>
+	   <h n='5'><s>Period of the</s> enterprise’s activity</h>
+	   <h n='6'><s>Income received</s> from the enterprise’s activity within the reporting period (1 January - 31 December)</h>
+	 </q>
+	<q n='8' t='ADpaid_work'>
+        <w><s>Have you or your family members undertaken any type of paid work in Georgia</s> or abroad, except for working in an enterprise?</w>
+        <h n='1'><s>Name</s></h>
+        <h n='2'><s>Organisation</s></h>
+        <h n='3'><s>Job title</s></h>
+        <h n='4'><s>Income received within</s> reporting period (1 January - 31 December)</h>
+    </q>
+	<q n='9' t='AD_active contracts'>
+        <w><s>Have you or your family members had any active contracts dating back from 1 January, in Georgia or abroad</s> exceeding 3,000 GEL (1,800 USD approximately)?</w>
+        <h n='1'><s>First name, last name of the</s> parties of the contract</h>
+        <h n='2'><s>Subject of the Contract and its</s> value</h>
+        <h n='3'><s>Date of signature, validity</s> period, registering authority</h>
+        <h n='4'><s>Income Contract from the</s> agreement within reporting period (1 January - 31 December)</h>
+    	<outcome>First_Name,Last_Name,Old_Col_2,Old_Col_3,Amount,Dimension</outcome>
+    </q>
+	
+	<q n='10' t='AD_gifts'>
+	    <w><s>Have you or your family members received any gifts</s> valued at more than 500 GEL (300 USD approximately) during the reporting period (1 January - 31 December)?</w>
+		<h n='1'><s>Person’s name who received the gift</s></h>
+		<h n='2'><s>Type and market price of the gift</s></h>
+		<h n='3'><s>Relationship</s></h>
+	</q>
+	<q n='11' t='ADincome_or_expenditures'>
+       <w><s>Have you or your family members received any income or had any expenditures during the reporting period</s> (1January - 31 December) valued at more than 1,500 GEL (900 USD approximately) that you did not indicate on the pages above?</w>
+	   <h n='1'><s>First name, last name of the person who</s> had income or/and expenditures</h>
+	   <h n='2'><s>Type of income or/and expenditures</s></h>
+	   <h n='3'><s>Amount (price) of income or/and</s> expenditures</h>
+	</q>
+	 
+</AssetDeclarations>
