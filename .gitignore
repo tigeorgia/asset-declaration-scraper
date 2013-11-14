@@ -5,3 +5,10 @@ csvoutput/*
 .project
 .settings/
 bin/
+declarationids-*
+declarationScrapy/idlist
+idlistoutput/
+logfile
+newids
+sortedidlist
+
