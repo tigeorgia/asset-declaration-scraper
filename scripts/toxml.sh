@@ -56,21 +56,34 @@ if [ ! -d "$XML_OUTPUT"/ka ]; then
     mkdir "$XML_OUTPUT"/ka
 fi
 
-echo "Converting English documents"
+echo "Converting English documents..."
 for f in `ls $PDF/en/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
     $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
     cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/en/$name.xml
-    #break
+
+    if xmllint --noout $XML_OUTPUT/en/$name.xml; then
+        continue
+    else
+	rm $XML_OUTPUT/en/$name.xml
+        echo "WARNING: "+$name+".xml (English version) was not formed properly! It was removed automatically, to avoid any further processing problems."
+    fi
+
 done
-echo "Converting Georgian documents"
+echo "Converting Georgian documents..."
 for f in `ls $PDF/ka/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
     $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
     cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/ka/$name.xml
-    #break
+
+    if xmllint --noout $XML_OUTPUT/ka/$name.xml; then
+        continue
+    else
+	rm $XML_OUTPUT/ka/$name.xml
+        echo "WARNING: "+$name+".xml (Georgian version) was not formed properly! It was removed automatically, to avoid any further processing problems."
+    fi
 done
 rm $XML_OUTPUT/test.xml
 

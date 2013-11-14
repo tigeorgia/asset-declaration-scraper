@@ -3,6 +3,30 @@ Asset Declaration Scrapper
 
 This project is used to get the information available on [http://declaration.gov.ge](http://declaration.gov.ge), regarding Georgian public officials' asset declarations. Once the program (which consists in running a bunch of scripts) is done running, CSV files of both Georgian and English declarations are created. This is a 4-step process, please have a look at each of these steps below for more information.
 
+Prerequisites
+-------------
+
+Before running any scripts, you need to configure the environment you're running the scripts from: either from 'dev' (usually you development machine/environment) or 'prod' (the server you plan to run your script periodically).
+
+1) After cloning the project onto the chosen machine, open the configuration file:
+
+`.scripts/config.properties` 
+
+2) Update the <b>full</b> paths of the following files and folder:
+
+- FunctionsForEachCSVFile.xquery
+- AssetDeclarationsQuestionsInformation.xml
+- the 'xmloutput' folder
+
+Update the values to the properties tied to the environment you're aiming (ie update either the '.dev' or the '.prod' properties)
+
+3) Save and close `config.properties`.
+
+4) Open `.scripts/complete.sh` and update the variable `ENVIRONMENT`. Save and close this file then.
+
+Running the scripts
+-------------------
+
 To run the entire process (all the 4 steps), run the following script, from the root of the project:
 
 `./scripts/complete.sh <list of declaration ids>`

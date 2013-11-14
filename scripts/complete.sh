@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Update the following line with one of these 2 values: 'dev' or 'prod'
+# - Choose 'prod' if you are running the scripts from a remote server
+# - Choose 'dev' if you are running the scripts in a development environment (ie your work machine).
+ENVIRONMENT=prod
+
+
 OUTPUT=idlistoutput
 BASEDIR=$PWD
 PATH_TO_SCRAPPER=$BASEDIR/declarationScrapy
@@ -26,6 +32,6 @@ $SCRIPTS_FOLDER/downloadpdf.sh
 $SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 
 # The XML files have been generated, we can now turn them into CSV files
-$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $CSV_OUTPUT
+$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $CSV_OUTPUT $ENVIRONMENT
 
 

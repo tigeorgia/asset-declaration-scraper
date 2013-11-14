@@ -2,7 +2,7 @@ module namespace tiADQ = "http://transparency.ge/AssetDeclaration/FunctionsForEa
 
 declare namespace ti = "http://transparency.ge";
  
- import module namespace tiAD= "http://transparency.ge/AssetDeclaration" at "AssetDeclaration.xquery"; 
+import module namespace tiAD= "http://transparency.ge/AssetDeclaration" at "AssetDeclaration.xquery"; 
 import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "XMLUtilities.xquery";
 
 

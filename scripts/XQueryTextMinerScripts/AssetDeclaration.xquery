@@ -3,13 +3,13 @@ module namespace tiAD= "http://transparency.ge/AssetDeclaration";
 declare namespace ti = "http://transparency.ge";
 
 import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "XMLUtilities.xquery";
- 
 
-declare variable $tiAD:QI := doc('AssetDeclarationsQuestionsInformation.xml');
+declare variable $tiAD:QI := doc('scraper.ad.questionsinfo.toreplace');
 
-declare variable $tiAD:collectiondir2 := "/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources2";
-declare variable $tiAD:collectiondir := "/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources";
-
+(: declare variable $tiAD:collectiondir2 := "/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources2"; :)
+(: declare variable $tiAD:collectiondir := "/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources"; :)
+declare variable $tiAD:collectiondir := "scraper.ad.collection.toreplace";
+declare variable $tiAD:collectiondir2 := "scraper.ad.collection.toreplace";
 
 declare variable $tiAD:attribution := "Created by Maarten Marx for TI Georgia. 2013-11-07";
 
