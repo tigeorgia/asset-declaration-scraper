@@ -1,4 +1,7 @@
-./declarationScrapy/output/*.pdf
-./xmloutput/*.xml
-./csvoutput/*.csv
-
+declarationScrapy/output/*
+xmloutput/*
+csvoutput/*
+.classpath
+.project
+.settings/
+bin/
