@@ -12,11 +12,10 @@ Before running any scripts, you need to configure the environment you're running
 
 `.scripts/config.properties` 
 
-2) Update the <b>full</b> paths of the following files and folder:
+2) Update the <b>full paths</b> of the following files:
 
 - FunctionsForEachCSVFile.xquery
 - AssetDeclarationsQuestionsInformation.xml
-- the 'xmloutput' folder
 
 Update the values to the properties tied to the environment you're aiming (ie update either the '.dev' or the '.prod' properties)
 

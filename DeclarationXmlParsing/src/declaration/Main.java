@@ -62,14 +62,12 @@ public class Main {
 		String environment = args[3];
 		
 		String questionInfo = null;
-		String collection = null;
 		String functionxquery = null;
 		 
     	try {
     		prop.load(new FileInputStream(args[4]));
     		
     		questionInfo = prop.getProperty("scraper.ad.questionsinfo."+environment);
-    		collection = prop.getProperty("scraper.ad.collection."+environment);
     		functionxquery = prop.getProperty("scraper.ad.functionxquery."+environment);
     		
     		File mainXqueryFile = new File(xqueryPath + "/" + MAIN_XQUERY_FILE);
@@ -77,16 +75,13 @@ public class Main {
     		
     		replaceSelected(mainXqueryFile, "scraper.ad.functionxquery.toreplace", functionxquery);
     		replaceSelected(adXqueryFile, "scraper.ad.questionsinfo.toreplace", questionInfo);
-    		replaceSelected(adXqueryFile, "scraper.ad.collection.toreplace", collection);
  
-    		
     		generateCsvFiles(args);
     		System.out.println("Done. The CSV files are in " + args[2]);
     		
     		// Re-initializing config files (ie revert the changes made previously, for the execution of generateCsvFiles())
     		replaceSelected(mainXqueryFile, functionxquery, "scraper.ad.functionxquery.toreplace");
     		replaceSelected(adXqueryFile, questionInfo, "scraper.ad.questionsinfo.toreplace");
-    		replaceSelected(adXqueryFile, collection, "scraper.ad.collection.toreplace");
     		
     		
     	} catch (IOException ex) {
