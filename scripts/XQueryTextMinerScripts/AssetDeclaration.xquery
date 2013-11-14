@@ -147,6 +147,12 @@ let $head := normalize-space($headerText)
 return
  starts-with($s,$head)  };
  
+ (: Only output a row for a $QuestionID if it is of the correct arity :)
+declare function tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionID){
+    let $arity := $tiAD:QI//q[@n=$QuestionID]/@a 
+    return
+    if (count($output)=$arity) then tiAD:Writerow($output,$doc,$Outputformat) else '' (: for $i in 1 to 8 return ' ':)  
+};
 
 declare function tiAD:Writerow($output,$doc,$Outputformat){
     let $output := for $i in $output return normalize-space(string($i))

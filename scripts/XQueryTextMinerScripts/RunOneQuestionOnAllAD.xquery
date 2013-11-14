@@ -15,8 +15,9 @@ import module namespace tiADQ = "http://transparency.ge/AssetDeclaration/Functio
  
    declare variable $XMLstore := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources/';
 
-  let $col := collection($XMLstore)   
+  let $col :=  collection($XMLstore)  (: subsequence(collection($XMLstore) ,1,100)  :)
 return
- 
- tiADQ:ExtractTextToFile($col,8,'xml','ADpaid_work')
+  
+   tiADQ:ExtractTextToFile($col,3,'xml','ADheader')   
+  
  

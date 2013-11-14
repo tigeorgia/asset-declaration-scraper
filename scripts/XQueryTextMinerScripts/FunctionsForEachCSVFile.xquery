@@ -10,6 +10,36 @@ import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "XMLUt
 (: general wrapper around the text extraction for each $doc function :)
   
 declare function       tiADQ:ExtractTextToFile($col,$QuestionID,$OutputFormat,$Outputfile){
+if ($OutputFormat='xml') 
+then
+<table name='{tiAD:TableName($QuestionID)}'>
+{
+tiAD:WriteHeader($col,$QuestionID,$OutputFormat,$Outputfile),
+for $doc in  $col 
+return
+tiADQ:ExtractText($doc,$QuestionID,$OutputFormat)
+}
+</table>
+ 
+else 
+if ($OutputFormat='csv')
+then
+for $doc in  $col 
+return
+(tiAD:WriteHeader($col,$QuestionID,$OutputFormat,$Outputfile),
+'&#10;',
+tiADQ:ExtractText($doc,$QuestionID,$OutputFormat)
+)
+else
+tiUtil:WriteError(concat('Unrecognized output format: ',$OutputFormat,'. You can only use "csv" or "xml".'))
+
+        };
+        
+        
+   (: old version 
+(: general wrapper around the text extraction for each $doc function :)
+  
+declare function       tiADQ:ExtractTextToFile($col,$QuestionID,$OutputFormat,$Outputfile){
 (tiAD:WriteHeader($col,$QuestionID,$OutputFormat,$Outputfile),
 '&#10;'
 ,
@@ -34,7 +64,7 @@ else
 tiUtil:WriteError(concat('Unrecognized output format: ',$OutputFormat,'. You can only use "csv" or "xml".'))
 )
         };
-        
+  :)      
 
 
 (: the real work is done by this function :) 
@@ -55,8 +85,8 @@ for $page in tiAD:GetOurPages($doc,$PageQuestionString)[1]
      
     (: Place of Birth, Date of Birth: :)
     let $bdtext := $page//text[matches(normalize-space(.),'^Place of Birth, Date of Birth:$')]//following-sibling::text[1]
-    let $birthdate := tiUtil:toISOdate(replace($bdtext,'[^0-9/]',''))
-    let $birthplace :=  replace($bdtext,'[0-9/]','')
+    let $birthdate := tiUtil:toISOdate(replace($bdtext,'^(.*) ([0-9/]+)$','$2'))
+    let $birthplace :=  replace($bdtext,'^(.*) ([0-9/]+)$','$1')
 (: Organisation, Position: :)
   let $org := $page//text[matches(normalize-space(.),'^Organisation, Position:$')]//following-sibling::text[1]/text()
   
@@ -65,7 +95,7 @@ for $page in tiAD:GetOurPages($doc,$PageQuestionString)[1]
 (: specify output order :)  
 let $output := ($fnln,$birthplace,$birthdate, $org, $work, $submitDate )  
 (: end of special part for question 0 :)
-return tiAD:Writerow($output,$doc,$Outputformat)
+return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 
 else 
 
@@ -81,85 +111,113 @@ if ($QuestionIdentifier=1)
 then
 
     let $output := (subsequence($tr/td,1,3),tiUtil:toISOdate($tr/td[4]),$tr/td[5])
-    return tiAD:Writerow($output,$doc,$Outputformat)
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)  
 else    
-if ($QuestionIdentifier=2)
+
+if ($QuestionIdentifier=2 ) 
 then
  let $fnlnline := tokenize($tr/td[1],' +')  
     let $fnln := subsequence($fnlnline,1,2)
     let $percentage:= if ($fnlnline[3]) then subsequence($fnlnline,3,count($fnlnline)) else ' '
 (: type :)
-    let $type := $tr/td[2]   
+    let $type := tiUtil:pad($tr/td[2])   
 (: The property description :)
  (: let $prop := $tr/td[xs:integer(@left) gt $SecondColEnd]
                         [xs:integer(@left)+xs:integer(@width)  lt $FourthColStart]
  let $niceprop := string-join( for $t in $prop return normalize-space($t),' ')
  :)
  let $niceprop := $tr/td[3]
- let $propdescription := if (contains($niceprop,'Area -')) then substring-before($niceprop,'Area -') else $niceprop
+ let $propdescription := if (contains($niceprop,'Area -')) then tiUtil:pad(substring-before($niceprop,'Area -')) else tiUtil:pad($niceprop)
  let $area := if (contains($niceprop,'Area -')) then 
                     let $a := normalize-space(substring-after($niceprop,'Area -'))
                     return 
-                    (substring-before($a,' '),replace(substring-after($a,' '),' ',''))
-                    else ' '
+                    (tiUtil:pad(substring-before($a,' ')),tiUtil:pad(replace(substring-after($a,' '),' ','')))
+                    else (' ',' ')
  (: the last question :)
- let $poss := $tr/td[4]
+ let $poss := tiUtil:pad($tr/td[4])
 (: specify output order :)  
 let $output :=   ($fnln,$percentage,$type,$propdescription,$area,$poss) 
-    return tiAD:Writerow($output,$doc,$Outputformat)
+let $output := if (count($output)=8) then $output else for $i in 1 to 8 return ' '  (: make sure that the output is always 8 long :)
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else    
+
+
+if ($QuestionIdentifier=3)
+then
+ let $fnlnline := tokenize($tr/td[1],' +')  
+    let $fnln := subsequence($fnlnline,1,2)
+    let $percentage:= if ($fnlnline[3]) then subsequence($fnlnline,3,count($fnlnline)) else ' '
+let $output :=   ($fnln,$percentage, subsequence($tr/td,2,3) ) 
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
+else
 
 if ($QuestionIdentifier=4)
 then
 let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($tr/td,2,2),tiUtil:toAmountWithMoneyUnit($tr/td[4]) ) 
-    return tiAD:Writerow($output,$doc,$Outputformat)
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else
 
 if ($QuestionIdentifier=5)
 then
 let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($tr/td,2,2),tiUtil:toAmountWithMoneyUnit($tr/td[4]) ) 
-    return tiAD:Writerow($output,$doc,$Outputformat)
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else
 
 if ($QuestionIdentifier=6)
 then
 let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]), tiUtil:toAmountWithMoneyUnit($tr/td[2]) ) 
-    return tiAD:Writerow($output,$doc,$Outputformat)
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else
 
 if ($QuestionIdentifier=7)
 then
-let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($tr/td,2,4),tiUtil:toAmountWithMoneyUnit($tr/td[6]) ) 
-    return tiAD:Writerow($output,$doc,$Outputformat)
+let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),  subsequence($tr/td,2,4)  ,tiUtil:toAmountWithMoneyUnit($tr/td[6]) ) 
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else
 if ($QuestionIdentifier=8)
 then
 
-        let $fnln := tokenize($tr/td[1],' +')  
-        let $org:= $tr/td[2] 
-    let $jobtitle := $tr/td[3]
+        let $fnln := tiUtil:ParseStringToFirstNameLastName($tr/td[1])  
+        let $org:= tiUtil:pad($tr/td[2]) 
+    let $jobtitle := tiUtil:pad($tr/td[3])
     let $amount := tiUtil:toAmountWithMoneyUnit($tr/td[4])
     let $output :=    ($fnln,$org,$jobtitle,$amount)  
-return tiAD:Writerow($output,$doc,$Outputformat)
+return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 
 else
 if ($QuestionIdentifier=9)
 then
   
-        let $fnln := tokenize($tr/td[1],' +')  
-        let $col2:= $tr/td[2]
-        let $col3 := $tr/td[3]
+        let $fnln := tiUtil:ParseStringToFirstNameLastName($tr/td[1]) 
+        let $col2:= tiUtil:pad($tr/td[2])
+        let $col3 := tiUtil:pad($tr/td[3])
         let $amount := tiUtil:toAmountWithMoneyUnit($tr/td[4])
          (: we could try to separate "GEL (Expenditure)" into 2 columns :)
     let $output :=    ($fnln,$col2,$col3,$amount )  
     
-return tiAD:Writerow($output,$doc,$Outputformat)
+return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
+else
+
+
+(: 10 First_Name,Last_Name,Type,Amount,Dimension,Family_Relation :)
+if ($QuestionIdentifier=10)
+then
+  
+        let $fnln := tiUtil:ParseStringToFirstNameLastName($tr/td[1]) 
+        let $col2:= tiUtil:pad($tr/td[2])
+        let $type := tiUtil:pad(replace($tr/td[2],'^(.*),(.*)$','$1'))
+        let $amount := tiUtil:toAmountWithMoneyUnit(replace($tr/td[2],'^(.*),(.*)$','$2'))
+        let $col3 := tiUtil:pad($tr/td[3])
+        
+    let $output :=    ($fnln,$type,$amount,$col3 )  
+    
+return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else
 
 if ($QuestionIdentifier=11)
 then
 let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($tr/td,2,1),tiUtil:toAmountWithMoneyUnit($tr/td[last()]) ) 
-    return tiAD:Writerow($output,$doc,$Outputformat)
+    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 
 
 
@@ -168,7 +226,7 @@ let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($
 else (: the default is just to output the raw output :)
   
   let $output := $tr//td//text()
-  return tiAD:Writerow($output,$doc,$Outputformat)
+  return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
   
   
 };
