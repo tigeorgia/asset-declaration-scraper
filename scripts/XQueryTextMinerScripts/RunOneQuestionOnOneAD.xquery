@@ -20,6 +20,6 @@ declare variable $outputtype external; (: xml OR csv :)
 declare variable $DocID external; (: just the ID :)
 declare variable $XMLstore  external ; (: := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources/'; :)
 
-let $doc := concat($XMLstore,'/',$DocID,'.xml')
-return  tiADQ:ExtractText($doc,$QuestionIdentifier,$Language,$Outputformat)  
+let $doc := doc(concat($XMLstore,'/',$DocID,'.xml'))
+return  tiADQ:ExtractText($doc,$QuestionID,$Language,$outputtype)  
   

@@ -34,6 +34,8 @@ public class Main {
 
 	private final static String ENGLISH_LANGUAGE = "en";
 	private final static String GEORGIAN_LANGUAGE = "ka";
+	private final static String ENGLISH_LANGUAGE_IN_XQUERY = "eng";
+	private final static String GEORGIAN_LANGUAGE_IN_XQUERY = "geo";
 	private final static String CSV_TYPE = "csv";
 	private final static String AD_INFO_XML = "AssetDeclarationsQuestionsInformation.xml";
 	private final static String MAIN_XQUERY_FILE = "RunOneQuestionOnOneAD.xquery";
@@ -175,7 +177,14 @@ public class Main {
 			File[] files = new File(completeXMLPath).listFiles();
 			
 			FileWriter result = new FileWriter(csvFolderPath + "/"+ lang + "/" + csvName+"_"+lang+".csv");
-
+			
+			String languageInXquery = null;
+			if (lang.equalsIgnoreCase(ENGLISH_LANGUAGE)){
+				languageInXquery = ENGLISH_LANGUAGE_IN_XQUERY;
+			}else if (lang.equalsIgnoreCase(GEORGIAN_LANGUAGE)){
+				languageInXquery = GEORGIAN_LANGUAGE_IN_XQUERY;
+			}
+				
 			for (File file : files) {
 				if (file.isFile()) {
 
@@ -186,7 +195,7 @@ public class Main {
 					expr.bindAtomicValue(new QName("QuestionID"), questionid, conn.createAtomicType(XQItemType.XQBASETYPE_INTEGER));
 					expr.bindAtomicValue(new QName("DocID"), fileId, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
 					expr.bindAtomicValue(new QName("XMLstore"), completeXMLPath, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
-					expr.bindAtomicValue(new QName("XMLstore"), completeXMLPath, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+					expr.bindAtomicValue(new QName("Language"), languageInXquery, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
 					
 					
 					XQResultSequence xqjs  = expr.executeQuery();
