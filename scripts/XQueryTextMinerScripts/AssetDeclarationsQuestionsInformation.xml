@@ -19,7 +19,7 @@
 			<text top="107" left="644" width="257" height="17" font="5">
 			<b>Location of the property, total</b>
 			</text>
-	outcome-element: specifies the output schema (that is, the names of the columns from left to right)
+	outschema-element: specifies the output schema (that is, the names of the columns from left to right)
 	
 	We have exactly the same information for the Georgiam PDF;s, but now we use wg and hg elements to store the Georgian information.
 	Also in the Georgian elements we use the s-element to indicate the relevant substring for matching a text element.
@@ -39,15 +39,20 @@
 		<outschema>First_Name,Last_Name,Birth_Place,Birth_Date,Organisation_Position,Work_Address,Submission_Date</outschema>  <!-- $fnln,$birthplace,$birthdate, $org, $work, $submitDate  -->
 	</q>
     <q n='1' t='ADfamily_relations' a='5'>
-        <w><s>Data about family members (spouse, children, other persons)</s> </w>
+        <w><s>Data about family members (spouse, children, other persons)</s></w>
         <h n='1'><s>First Name </s></h>
         <h n='2'><s>Last Name</s></h>
         <h n='3'><s>Place of birth</s></h>
         <h n='4'><s>Date of birth</s></h>
         <h n='5'><s>Relationship</s></h>
-    	<outschema>First_Name,Last_Name,Birth_Place,Birth_Date,Family_Relation</outschema>  
-    	 
-	  
+    	<outschema>First_Name,Last_Name,Birth_Place,Birth_Date,Family_Relation</outschema> 
+		<wg><s>თქვენი ოჯახის წევრების (მეუღლე, არასრულწლოვანი შვილი, (გერი), თქვენთან მუდმივად მცხოვრები პირი) მონაცემები</s></wg>
+        <hg n='1'><s>სახელი</s></hg>
+        <hg n='2'><s>გვარი</s></hg>
+        <hg n='3'><s>დაბადების ადგილი</s></hg>
+        <hg n='4'><s>დაბადების რიცხვი, თვე, წელი</s></hg>
+        <hg n='5'><s>ნათესაური ან სხვაგვარი</s></hg>		
+		<outschemag>სახელი,გვარი,დაბადების ადგილი,დაბადების რიცხვი, თვე, წელი,ნათესაური ან სხვაგვარი</outschemag>
     </q>
 	<q n='2' t='ADreal_estate' a='8'>
 	   <w><s>Do you or your family members own real estate?</s></w>
@@ -58,8 +63,16 @@
 	   <h n='4'><s>If the property is in common</s> possession, list all owners of the property, as well as their share in percentage</h>
 		 
 		<outschema>First_Name,Last_Name,Percentage,Property_Type,Property_Description,Area,Dimension,Common_Possesion</outschema> <!-- ($fnln,$percentage,$type,$propdescription,$area,$poss)  -->
+	
+	 <wg><s>თქვენი, თქვენი ოჯახის წევრის საკუთრებაში არსებული უძრავი ქონება</s></wg>
+		 
+	   <hg n='1'><s>ქონების მესაკუთრის სახელი, გვარი </s> (თუ ნივთი საერთო საკუთრებაში იმყოფება, მიუთითეთ მფლობელის პროცენტული წილი)</hg>
+		<hg n='2'><s>ქონების სახეობა</s></hg>
+		<hg n='3'><s>ქონების ადგილმდებარეობა, საერთო</s> ფართობი</hg>
+	   <hg n='4'><s>თუ ნივთი საერთო საკუთრებაში</s> იმყოფება, მიუთითეთ თანამესაკუთრეები (თუ თანამესაკუთრე თქვენი ოჯახის წევრია მიუთითეთ მისი პროცენტული წილი)</hg>
+		 
+		<outschemag>სახელი,გვარი,პროცენტული წილი,ქონების სახეობა,ქონების აღწერა,ფართობი,სიდიდე,საერთო საკუთრებაში იმყოფება</outschemag> <!-- ($fnln,$percentage,$type,$propdescription,$area,$poss)  -->
 	</q>
-   
 	<q n='3' t='ADmovable_property' a='6'>
        <w><s>Do you or your family members own any movable property</s> (except for cash, securities, bank deposits, etc.) valued at more than 10,000 GEL (6,100 USD approximately)?</w>
        <h n='1'><s>Name of the owner of the</s> property (if the property is in common possession then indicate the shares in percentages)</h>
@@ -67,6 +80,13 @@
 	   <h n='3'><s>Details of the ownership</s></h>
 	   <h n='4'><s>If the property is in common</s> possession, all owners shall be indicated (if the property is in common possession, shares in percentages should be indicated)</h>
 		<outschema>First_Name,Last_Name,Percentage,Property_Type,Property_Description, Common_Possesion</outschema> 
+	 
+       <wg><s>თქვენი, თქვენი ოჯახის წევრის საკუთრებაში არსებული მოძრავი ქონება</s> (ფასიანი ქაღალდების, საბანკო ანგარიშების ან/და შენატანის, ნაღდი ფულადი თანხის გარდა), რომელთაგან თითოეულის ღირებულება აღემატება 10 000 ლარს</wg>
+       <hg n='1'><s>ქონების მესაკუთრის სახელი, გვარი</s> (თუ ნივთი საერთო საკუთრებაში იმყოფება, მიუთითეთ მფლობელის პროცენტული წილი)</hg>
+	   <hg n='2'><s>ქონების სახეობა</s></hg>
+	   <hg n='3'><s>ქონების დეტალები</s></hg>
+	   <hg n='4'><s>თუ ნივთი საერთო საკუთრებაში</s> იმყოფება, მიუთითეთ თანამესაკუთრეები (თუ თანამესაკუთრე თქვენი ოჯახის წევრია მიუთითეთ მისი პროცენტული წილი)</hg>
+		<outschemag>სახელი,გვარი,პროცენტული წილი,ქონების სახეობა,ქონების აღწერა, საერთო საკუთრებაში იმყოფება</outschemag> 
 	</q>
 	<q n='4' t='ADsecurities' a='6'>
 	    <w><s>Do you or your family members own any securities?</s></w>
@@ -75,7 +95,15 @@
 		<h n='3'><s>Type</s></h>
 		<h n='4'><s>Nominal value</s></h>
 		<h n='5'><s>Quantity</s></h>
-		<outcome>First_Name,Last_Name,Issuer,Type,Amount,Dimension</outcome>
+		<outschema>First_Name,Last_Name,Issuer,Type,Amount,Dimension</outschema>
+    
+	    <wg><s>თქვენი, თქვენი ოჯახის წევრის საკუთრებაში არსებული ფასიანი ქაღალდები</s></wg>
+		<hg n='1'><s>მესაკუთრის ვინაობა (სახელი</s>, გვარი)</hg>
+		<hg n='2'><s>ფასიანი ქაღალდის ემიტენტი</s></hg>
+		<hg n='3'><s>ფასიანი ქაღალდის სახეობა</s></hg>
+		<hg n='4'><s>ფასიანი ქაღალდის ნომინალი</s></hg>
+		<hg n='5'><s>ფასიანი ქაღალდების რაოდენობა</s></hg>
+		<outschemag>სახელი,გვარი,ემიტენტი,სახეობა,რაოდენობა,სიდიდე</outschemag>
     </q>
 	
 	<q n='5' t='ADbank_accounts' a='6'>
@@ -84,13 +112,25 @@
 		<h n='2'><s>Name of the bank</s> and/or other financial institution</h>
 		<h n='3'><s>Type of account and/or deposit</s></h>
 		<h n='4'><s>Amount of credit or debit</s> on the account</h>
-		<outcome>First_Name,Last_Name,Bank,Account_Type,Amount,Dimension</outcome>
+		<outschema>First_Name,Last_Name,Bank,Account_Type,Amount,Dimension</outschema>
+     
+        <wg><s>საქართველოს ან სხვა ქვეყნის საბანკო ან/და სხვა საკრედიტო დაწესებულებებში არსებული ანგარიში ან/და შენატანი,რომლის განკარგვის უფლება გაქვთ თქვენ, თქვენი ოჯახის წევრს</s></wg>
+        <hg n='1'><s>ანგარიშის ან/და შენატანის განმკარგავი პირის ვინაობა (სახელი,გვარი)</s></hg>
+		<hg n='2'><s>საბანკო </s>ან/და სხვა საკრედიტო დაწესებულების სახელწოდება</hg>
+		<hg n='3'><s>ანგარიშის ან/და შენატანის სახეობა</s></hg>
+		<hg n='4'><s>ანგარიშზე ან/და შენატანზე არსებული</s> ნაშთი (კრედიტი ან დებეტი)</hg>
+		<outschemag>სახელი,გვარი,ბანკი,ანგარიშის ტიპი,რაოდენობა,სიდიდე</outschemag>
     </q>
 	<q n='6' t='ADcash' a='4'>
 	    <w><s>Do you or your family members hold cash valued at more than 4,000 GEL (2,400 USD approximately)?</s></w>
 	    <h n='1'><s>First name, last name of cash owner</s></h>
 	    <h n='2'><s>Amount of cash in the original currency</s></h>
-		<outcome>First_Name,Last_Name, Amount,Dimension</outcome>
+		<outschema>First_Name,Last_Name, Amount,Dimension</outschema>
+	 
+	    <wg><s>თქვენი, თქვენი ოჯახის წევრის საკუთრებაში არსებული ნაღდი ფულადი თანხა, რომლის ოდენობა აღემატება 4 000 ლარს</s></wg>
+	    <hg n='1'><s>ფულადი თანხის მესაკუთრის ვინაობა (სახელი, გვარი)</s></hg>
+	    <hg n='2'><s>ფულადი თანხის ოდენობა შესაბამის ვალუტაში</s></hg>
+		<outschemag>სახელი,გვარი,რაოდენობა,სიდიდე</outschemag>
 	</q>
 	<q n='7' t='ADentrepreneurial_activity' a='8'>
 	   <w><s>Have you or your family members undertaken any type of entrepreneurial activity?</s></w>
@@ -100,7 +140,16 @@
 	   <h n='4'><s>Registering body</s> and date of registration</h>
 	   <h n='5'><s>Period of the</s> enterprise’s activity</h>
 	   <h n='6'><s>Income received</s> from the enterprise’s activity within the reporting period (1 January - 31 December)</h>
-		<outcome>First_Name,Last_Name,Organisation,Form_Of_Partnership,OldCol4,OldCol5, Amount,Dimension</outcome>
+		<outschema>First_Name,Last_Name,Organisation,Form_Of_Partnership,OldCol4,OldCol5, Amount,Dimension</outschema>
+	  
+	   <wg><s>საქართველოში ან სხვა ქვეყანაში თქვენი, თქვენი ოჯახის წევრის მონაწილეობა სამეწარმეო საქმიანობაში</s></wg>
+	   <hg n='1'><s>სამეწარმეო</s> საქმიანობაში მონაწილე პირის ვინაობა (სახელი,გვარი)</hg>
+	   <hg n='2'><s>საწარმოს სრული</s> საფირმო სახელწოდება და იურიდიული მისამართი</hg>
+	   <hg n='3'><s>საწარმოს საქმიანობაში მონაწილეობის ფორმა</s></hg>
+	   <hg n='4'><s>საწარმოს მარეგისტრირებელი ორგანო </s> და რეგისტრაციის თარიღი</hg>
+	   <hg n='5'><s>სამეწარმეო საქმიანობაში</s> მონაწილეობის დროის მონაკვეთი</hg>
+	   <hg n='6'><s>საწარმოს საქმიანობით</s> წინა წლის პირველი იანვრიდან 31 დეკემბრის ჩათვლით მიღებული შემოსავალი</hg>
+		<outschemag>სახელი,გვარი,ორგანიზაცია,საწარმოს საქმიანობაში მონაწილეობის ფორმა,OldCol4,OldCol5, რაოდენობა,სიდიდე</outschemag>
 	 </q>
 	<q n='8' t='ADpaid_work' a='6'>
         <w><s>Have you or your family members undertaken any type of paid work in Georgia</s> or abroad, except for working in an enterprise?</w>
@@ -108,7 +157,14 @@
         <h n='2'><s>Organisation</s></h>
         <h n='3'><s>Job title</s></h>
         <h n='4'><s>Income received within</s> reporting period (1 January - 31 December)</h>
-		<outcome>First_Name,Last_Name,Organisation,Job_Title, Amount,Dimension</outcome>
+		<outschema>First_Name,Last_Name,Organisation,Job_Title, Amount,Dimension</outschema>
+    
+        <wg><s>საქართველოში ან სხვა ქვეყანაში, თქვენი, თქვენი ოჯახის წევრის მიერ შესრულებული ნებისმიერი ანაზღაურებადი</s> სამუშაო, სამეწარმეო საქმიანობაში მონაწილეობის გარდა</wg>
+        <hg n='1'><s>სამუშაოს შემსრულებელი პირის ვინაობა (სახელი, გვარი)</s></hg>
+        <hg n='2'><s>სამსახური, რომელშიც პირს უკავია თანამდებობა ან ასრულებს სამუშაოს,ასევე რომელშიც წინა წლის პირველი იანვრიდან 31 დეკემბრის ჩათვლით ეკავა თანამდებობა ან ასრულებდა სამუშაოს</s></hg>
+        <hg n='3'><s>თანამდებობის დასახელება ან სამუშაოს შინაარსი</s></hg>
+        <hg n='4'><s>სამუშაოს შესრულებით წინა წლის</s> პირველი იანვრიდან 31 დეკემბრის ჩათვლით მიღებული შემოსავალი</hg>
+		<outschemag>სახელი,გვარი,ორგანიზაცია,თანამდებობის დასახელება, რაოდენობა,სიდიდე</outschemag>
     </q>
 	<q n='9' t='AD_active contracts' a='6'>
         <w><s>Have you or your family members had any active contracts dating back from 1 January, in Georgia or abroad</s> exceeding 3,000 GEL (1,800 USD approximately)?</w>
@@ -116,7 +172,14 @@
         <h n='2'><s>Subject of the Contract and its</s> value</h>
         <h n='3'><s>Date of signature, validity</s> period, registering authority</h>
         <h n='4'><s>Income Contract from the</s> agreement within reporting period (1 January - 31 December)</h>
-    	<outcome>First_Name,Last_Name,Old_Col_2,Old_Col_3,Amount,Dimension</outcome>
+    	<outschema>First_Name,Last_Name,Old_Col_2,Old_Col_3,Amount,Dimension</outschema>
+     
+        <wg><s>საქართველოში ან სხვა ქვეყანაში თქვენი, თქვენი ოჯახის წევრის მიერ წინა წლის პირველი იანვრიდან დღემდე დადებული ან/და მოქმედი ხელშეკრულება,</s> რომლის საგნის ღირებულება აღემატება 3000 ლარს (მათ შორის წილის მინდობის ხელშეკრულება ღირებულების მიუხედავად)</wg>
+        <hg n='1'><s>ხელშეკრულებაში მონაწილე პირის</s> ვინაობა (სახელი, გვარი)</hg>
+        <hg n='2'><s>ხელშეკრულების სახეობა, საგანი და</s> ღირებულება</hg>
+        <hg n='3'><s>ხელშეკრულების დადების თარიღი, მისი მოქმედების </s> ვადა, ორგანო,რომელმაც მოახდინა ხელშეკრულების სახელმწიფო რეგისტრაცია ან დამოწმება </hg>
+        <hg n='4'><s>წინა წლის პირველი იანვრიდან 31 დეკემბრის ჩათვლით ხელშეკრულებით </s>  მიღებული მატერიალური შედეგი</hg>
+    	<outschemag>სახელი,გვარი,Old_Col_2,Old_Col_3,რაოდენობა,სიდიდე</outschemag>
     </q>
 	
 	<q n='10' t='AD_gifts' a='6'>
@@ -124,14 +187,26 @@
 		<h n='1'><s>Person’s name who received the gift</s></h>
 		<h n='2'><s>Type and market price of the gift</s></h>
 		<h n='3'><s>Relationship</s></h>
-		<outcome>First_Name,Last_Name,Type,Amount,Dimension,Family_Relation</outcome>
+		<outschema>First_Name,Last_Name,Type,Amount,Dimension,Family_Relation</outschema>
+	 
+	    <wg><s>თქვენი, თქვენი ოჯახის წევრის მიერ წინა წლის პირველი იანვრიდან 31 დეკემბრის ჩათვლით მიღებული საჩუქარი,</s> რომლის ღირებულება აღემატება 500 ლარს</wg>
+		<hg n='1'><s>საჩუქრის მიმღები </s></hg>
+		<hg n='2'><s>საჩუქრის სახეობა და საბაზრო ღირებულება</s></hg>
+		<hg n='3'><s>გამცემის მიმღებთან კავშირი </s></hg>
+		<outschemag>სახელი,გვარი,სახეობა,რაოდენობა,სიდიდე,Family_Relation</outschemag>
 	</q>
 	<q n='11' t='ADincome_or_expenditures' a='5'>
        <w><s>Have you or your family members received any income or had any expenditures during the reporting period</s> (1January - 31 December) valued at more than 1,500 GEL (900 USD approximately) that you did not indicate on the pages above?</w>
 	   <h n='1'><s>First name, last name of the person who</s> had income or/and expenditures</h>
 	   <h n='2'><s>Type of income or/and expenditures</s></h>
 	   <h n='3'><s>Amount (price) of income or/and</s> expenditures</h>
-		<outcome>First_Name,Last_Name,Type,Amount,Dimension</outcome>
+		<outschema>First_Name,Last_Name,Type,Amount,Dimension</outschema>
+	 
+       <wg><s>წინა წლის პირველი იანვრიდან 31 დეკემბრის ჩათვლით თქვენი ან თქვენი ოჯახის წევრის ნებისმიერი შემოსავალი ან/და</s> გასავალი, რომლის ოდენობა (ღირებულება) თითოეულ შემთხვევაში აღემატება 1500 ლარს და არ არის მითითებული ამ დეკლარაციის სხვა ფურცლებზე</wg>
+	   <hg n='1'><s>შემოსავლის/გასავლის მიმღები/გამცემი პირის </s> ვინაობა (სახელი გვარი)</hg>
+	   <hg n='2'><s>შემოსავლის ან/და გასავლის სახეობა</s></hg>
+	   <hg n='3'><s>შემოსავლის ან/და გასავლის ოდენობა</s> (ღირებულება)</hg>
+		<outschemag>სახელი,გვარი,რაოდენობა,სიდიდე</outschemag>
 	</q>
 	 
 </AssetDeclarations>

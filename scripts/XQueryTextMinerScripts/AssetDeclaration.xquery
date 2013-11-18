@@ -4,7 +4,9 @@ declare namespace ti = "http://transparency.ge";
 
 import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "XMLUtilities.xquery";
 
-declare variable $tiAD:QI := doc('scraper.ad.questionsinfo.toreplace');
+declare variable $tiAD:QI := doc(' AssetDeclarationsQuestionsInformation.xml');  
+ 
+
 
 declare variable $tiAD:attribution := "Created by Maarten Marx for TI Georgia. 2013-11-07";
 
@@ -64,33 +66,38 @@ In both we use the fact that column headers are in a b-element.
 If we do not use the b-element we get an error on question 1 where "First Name" occurs twice on the page.
 
 :)
-declare function tiAD:startCol($QuestionNumber, $ColumnNumber,$page){
-    let $headerText := $tiAD:QI//q[@n=$QuestionNumber]//h[@n=$ColumnNumber]/s
+declare function tiAD:startCol($QuestionNumber,$Language, $ColumnNumber,$page){
+    let $q := $tiAD:QI//q[@n=$QuestionNumber]
+    let $column := if ($Language='geo') then $q//hg else $q//h
+    let $headerText := $column[@n=$ColumnNumber]/s
     let $matchingtext := $page//text[./b[tiAD:MatchColumnName(.,$headerText)]]
     return
  xs:integer($matchingtext/@left)};
  
- declare function tiAD:endCol($QuestionNumber, $ColumnNumber,$page){
-    let $headerText := $tiAD:QI//q[@n=$QuestionNumber]//h[@n=$ColumnNumber]/s
+ declare function tiAD:endCol($QuestionNumber,$Language, $ColumnNumber,$page){
+    let $q := $tiAD:QI//q[@n=$QuestionNumber]
+    let $column := if ($Language='geo') then $q//hg else $q//h
+    let $headerText := $column[@n=$ColumnNumber]/s
     let $matchingtext := $page//text[./b[tiAD:MatchColumnName(.,$headerText)]]
     return
  xs:integer($matchingtext/@left) + xs:integer($matchingtext/@width)};
  
 
-declare function tiAD:CreateDataCells($questionNumber,$lines,$page){
+declare function tiAD:CreateDataCells($questionNumber,$Language,$lines,$page){
 let $q := $tiAD:QI//q[@n=$questionNumber]
 let $NrofColumns := count($q//h)
-for $n in $q//h (: for each header create the data cell:)
+let $ColumnNames := if ($Language='geo') then $q//hg else $q//h
+for $n in $ColumnNames (: for each header create the data cell:)
 return
 (: the first column: end of tekst is before the start of the second column :)
-if ($n/@n =1) then tiUtil:tostring($lines[xs:integer(@left)+xs:integer(@width) lt tiAD:startCol($questionNumber,xs:integer($n/@n)+1,$page)] )
+if ($n/@n =1) then tiUtil:tostring($lines[xs:integer(@left)+xs:integer(@width) lt tiAD:startCol($questionNumber,$Language,xs:integer($n/@n)+1,$page)] )
 else
 (: the last column: start of tekst is before the end of preceding column :)
-if ($n/@n=$NrofColumns) then tiUtil:tostring($lines[xs:integer(@left) gt tiAD:endCol($questionNumber,xs:integer($n/@n)-1,$page) ])
+if ($n/@n=$NrofColumns) then tiUtil:tostring($lines[xs:integer(@left) gt tiAD:endCol($questionNumber,$Language,xs:integer($n/@n)-1,$page) ])
 else
 (: end of tekst is before the start of the following column AND start of tekst is before the end of preceding column :)
-tiUtil:tostring($lines[xs:integer(@left) +xs:integer(@width) lt tiAD:startCol($questionNumber,xs:integer($n/@n)+1,$page)]
-      [xs:integer(@left) gt tiAD:endCol($questionNumber,xs:integer($n/@n)-1,$page) ] )
+tiUtil:tostring($lines[xs:integer(@left) +xs:integer(@width) lt tiAD:startCol($questionNumber,$Language,xs:integer($n/@n)+1,$page)]
+      [xs:integer(@left) gt tiAD:endCol($questionNumber,$Language,xs:integer($n/@n)-1,$page) ] )
 
  
 };
@@ -103,11 +110,20 @@ tiUtil:tostring($lines[xs:integer(@left) +xs:integer(@width) lt tiAD:startCol($q
 
 That is specific for each question :)
  
-declare function tiAD:WriteRawXML($doc,$questionNumber)
+declare function tiAD:WriteRawXML($doc,$questionNumber,$Language)
 {
+
 let $q := $tiAD:QI//q[@n=$questionNumber] 
-    let $PageQuestionString := $q//w/s
-    let $firstcolummheaderString := $q//h[@n=1]/s
+    let $PageQuestionString := if ($Language='eng') then  $q//w/s
+                                else 
+                                if ($Language='geo') then   $q//wg/s
+                                                     else 'ERROR: wrong language specification'
+    let $firstcolummheaderString := if ($Language='eng') then  $q//h[@n=1]/s
+                                    else 
+                                    if ($Language='geo') then   $q//hg[@n=1]/s
+                                                     else 'ERROR: wrong language specification'
+                                                     
+ 
 
 for $page in tiAD:GetOurPages($doc,$PageQuestionString)
     let $csvlinenrs := tiAD:csvlinenrs($page,$firstcolummheaderString,$PageQuestionString)
@@ -117,7 +133,7 @@ for $page in tiAD:GetOurPages($doc,$PageQuestionString)
         {
         for $line at $pos in $csvlinenrs 
             let $csvrow := tiAD:CreateCSVrow($line,$pos,$page,$csvlinenrs,$PageQuestionString)   
-            let $output :=    tiAD:CreateDataCells($questionNumber,$csvrow,$page) 
+            let $output :=    tiAD:CreateDataCells($questionNumber,$Language,$csvrow,$page) 
         return  
         
          <tr>
@@ -190,18 +206,20 @@ declare function  tiAD:WriteXMLrow($output,$doc){
         
  (: just write out the header of the csv or XML  file as comments :)    
  
-declare function tiAD:WriteHeader($col,$QuestionID,$OutputFormat,$Outputfile){
+declare function tiAD:WriteHeader($col,$QuestionID,$Language,$OutputFormat,$Outputfile){
 let $header := 
 concat('&#10;#File: ',$Outputfile,
 '&#10;#',$tiAD:attribution,'&#10;',
 '#',"Information mined from AssetDeclarations", '&#10;&#10;',
+'# LANGUAGE: ', $Language,'&#10;',
 '# QUESTION: ', string($tiAD:QI//q[@n=$QuestionID]//w),'&#10;',
 '# TABLE NAME: ',string(tiAD:TableName($QuestionID)),'&#10;',
 '# SCHEMA IN PDF: ', '&#10;#&#09;', string-join($tiAD:QI//q[@n=$QuestionID]//h,'&#10;#&#09;'),
-'&#10;# SCHEMA HERE: &#10; #',string-join(
-(tokenize(normalize-space($tiAD:QI//q[@n=$QuestionID]//outschema),',')
-,
-"DocumentId"),
+'&#10;# SCHEMA HERE (eng): &#10; #',string-join(
+(tokenize(normalize-space($tiAD:QI//q[@n=$QuestionID]//outschema),','),"DocumentId"),
+'&#09;'),
+'&#10;# SCHEMA HERE (geo): &#10; #',string-join(
+(tokenize(normalize-space($tiAD:QI//q[@n=$QuestionID]//outschemag),','),"DocumentId"),
 '&#09;'),
 '&#10;'
 )

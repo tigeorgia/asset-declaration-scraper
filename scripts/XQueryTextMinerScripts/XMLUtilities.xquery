@@ -5,7 +5,7 @@ module namespace tiUtil= "http://transparency.ge/XML-Utilities";
 
 declare function tiUtil:NotEmpty($s){ if ($s) then $s else ' '};
 declare function tiUtil:tostring($list){normalize-space(string-join( for $t in $list return normalize-space($t),' '))};
-declare function tiUtil:toISOdate($date){replace($date,'(..)/(..)/(....)','$3-$2-$1')};
+declare function tiUtil:toISOdate($date){ let $cleandate:= replace($date,'[^0-9/-]','') return replace($cleandate,'(..)/(..)/(....)','$3-$2-$1')};
 declare function tiUtil:toAmountWithMoneyUnit($money){
     let $amount := tiUtil:NotEmpty(replace($money,'[^0-9.]',''))
     let $Unit := tiUtil:NotEmpty(replace($money,'[0-9.]',''))

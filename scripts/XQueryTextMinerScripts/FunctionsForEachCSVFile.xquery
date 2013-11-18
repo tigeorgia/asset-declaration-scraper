@@ -9,91 +9,70 @@ import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "XMLUt
 
 (: general wrapper around the text extraction for each $doc function :)
   
-declare function       tiADQ:ExtractTextToFile($col,$QuestionID,$OutputFormat,$Outputfile){
+declare function       tiADQ:ExtractTextToFile($col,$QuestionID,$Language, $OutputFormat,$Outputfile){
 if ($OutputFormat='xml') 
 then
 <table name='{tiAD:TableName($QuestionID)}'>
 {
-tiAD:WriteHeader($col,$QuestionID,$OutputFormat,$Outputfile),
+tiAD:WriteHeader($col,$QuestionID,$Language,$OutputFormat,$Outputfile),
 for $doc in  $col 
 return
-tiADQ:ExtractText($doc,$QuestionID,$OutputFormat)
+
+tiADQ:ExtractText($doc,$QuestionID,$Language,$OutputFormat)
+
 }
 </table>
  
 else 
 if ($OutputFormat='csv')
 then
-for $doc in  $col 
-return
-(tiAD:WriteHeader($col,$QuestionID,$OutputFormat,$Outputfile),
+(tiAD:WriteHeader($col,$QuestionID,$Language,$OutputFormat,$Outputfile),
 '&#10;',
-tiADQ:ExtractText($doc,$QuestionID,$OutputFormat)
+for $doc in  $col  return tiADQ:ExtractText($doc,$QuestionID,$Language,$OutputFormat)
 )
 else
 tiUtil:WriteError(concat('Unrecognized output format: ',$OutputFormat,'. You can only use "csv" or "xml".'))
 
         };
         
-        
-   (: old version 
-(: general wrapper around the text extraction for each $doc function :)
-  
-declare function       tiADQ:ExtractTextToFile($col,$QuestionID,$OutputFormat,$Outputfile){
-(tiAD:WriteHeader($col,$QuestionID,$OutputFormat,$Outputfile),
-'&#10;'
-,
-if ($OutputFormat='xml') 
-then
-<table name='{tiAD:TableName($QuestionID)}'>
-{
-for $doc in  $col 
-return
-tiADQ:ExtractText($doc,$QuestionID,$OutputFormat)
-}
-</table>
- 
-else 
-if ($OutputFormat='csv')
-then
-for $doc in  $col 
-return
-tiADQ:ExtractText($doc,$QuestionID,$OutputFormat)
-
-else
-tiUtil:WriteError(concat('Unrecognized output format: ',$OutputFormat,'. You can only use "csv" or "xml".'))
-)
-        };
-  :)      
-
+      
 
 (: the real work is done by this function :) 
 
-declare function tiADQ:ExtractText($doc,$QuestionIdentifier,$Outputformat){
+declare function tiADQ:ExtractText($doc,$QuestionIdentifier,$Language,$Outputformat){
 (: special part for "question 0" (the header information :)
 if ($QuestionIdentifier=0)
 then
-let   $PageQuestionString := "Asset Declaration of Public Official" (: See step 1 :)
+let   $PageQuestionString := if ($Language ='eng') then  (: See step 1 :)
+                                    "Asset Declaration of Public Official" 
+                                    else "თანამდებობის პირის ქონებრივი მდგომარეობის დეკლარაცია"
+let $Submitregex :=   if ($Language ='eng') then    '^Asset Declaration was submitted on:' else   '^თანამდებობის პირის დეკლარაცია შევსებულია: '                
+let $Nameregex :=   if ($Language ='eng') then    '^First Name, Last Name:$' else   '^სახელი, გვარი:' 
+let $Birthregex := if ($Language ='eng') then '^Place of Birth, Date of Birth:$' else '^დაბადების ადგილი, დაბადების თარიღი:'
+let $Orgregex := if ($Language ='eng') then '^Organisation, Position:$' else '^სამსახური, დაკავებული (ყოფილი) თანამდებობა:'
+let $Workregex := if ($Language ='eng') then '^Work address, Phone number:$' else '^სამსახურის მისამართი, ტელეფონი:'
+
+
  return
 for $page in tiAD:GetOurPages($doc,$PageQuestionString)[1]
   
-    let $submitDate := tiUtil:toISOdate(replace($page//text[matches(.,'Asset Declaration was submitted on:')],'[^0-9/]',''))
+    let $submitDate := tiUtil:pad(tiUtil:toISOdate(replace($page//text[matches(normalize-space(.),$Submitregex)],'[^0-9/]','')))
     
     (: first name, last name :)
-    let $name := $page//text[matches(normalize-space(.),'^First Name, Last Name:$')]//following-sibling::text[1]
-    let $fnln := tiUtil:ParseStringToFirstNameLastName(string-join($name//text(),' '))
+    let $name :=  $page//text[matches(normalize-space(.),$Nameregex)]//following-sibling::text[1]
+    let $fnln :=  tiUtil:ParseStringToFirstNameLastName(string-join($name//text(),' '))
      
     (: Place of Birth, Date of Birth: :)
-    let $bdtext := $page//text[matches(normalize-space(.),'^Place of Birth, Date of Birth:$')]//following-sibling::text[1]
-    let $birthdate := tiUtil:toISOdate(replace($bdtext,'^(.*) ([0-9/]+)$','$2'))
-    let $birthplace :=  replace($bdtext,'^(.*) ([0-9/]+)$','$1')
+    let $bdtext :=  $page//text[matches(normalize-space(.),$Birthregex)]//following-sibling::text[1]
+    let $birthdate := tiUtil:pad(tiUtil:toISOdate(replace($bdtext,'^(.*), ([0-9/]+)$','$2')))
+    let $birthplace :=  tiUtil:pad(replace($bdtext,'^([^0-9/]+)([0-9/]+)$','$1'))
 (: Organisation, Position: :)
-  let $org := $page//text[matches(normalize-space(.),'^Organisation, Position:$')]//following-sibling::text[1]/text()
+  let $org := tiUtil:pad($page//text[matches(normalize-space(.),$Orgregex)]//following-sibling::text[1]/text())
   
  (: Work address, Phone number:  :)
- let $work := $page//text[matches(normalize-space(.),'^Work address, Phone number:$')]//following-sibling::text[1]/text()
+ let $work := tiUtil:pad($page//text[matches(normalize-space(.),$Workregex)]//following-sibling::text[1]/text())
 (: specify output order :)  
-let $output := ($fnln,$birthplace,$birthdate, $org, $work, $submitDate )  
+let $output := ($fnln, $birthplace,$birthdate, $org, $work, $submitDate )  
 (: end of special part for question 0 :)
 return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 
@@ -101,7 +80,7 @@ else
 
 (: generic part for all other questions :)
 (:step 1: Get the Raw data (that is, formatted as in the PDF :)
-let $table := tiAD:WriteRawXML($doc,$QuestionIdentifier)
+let $table := tiAD:WriteRawXML($doc,$QuestionIdentifier,$Language)
 for $tr in $table//tr 
 return
 (:step 2, reformat each line in the Raw output into $output. This is specific for each question :)
