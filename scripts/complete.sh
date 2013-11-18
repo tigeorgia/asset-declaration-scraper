@@ -26,12 +26,12 @@ fi
 $SCRIPTS_FOLDER/defineNewIds.sh $1
 
 # Download the new PDFs, based on the really new ids.
-$SCRIPTS_FOLDER/downloadpdf.sh
+#$SCRIPTS_FOLDER/downloadpdf.sh
 
 # Once we have the PDF, we need to convert them into XML files
-$SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
+#$SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 
 # The XML files have been generated, we can now turn them into CSV files
-$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $CSV_OUTPUT $ENVIRONMENT
+#$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $CSV_OUTPUT $ENVIRONMENT
 
 
