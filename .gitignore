@@ -11,4 +11,4 @@ idlistoutput/
 logfile
 newids
 sortedidlist
-
+*.class
