@@ -21,7 +21,9 @@ cp MANIFEST.MF $JAVA_APP_FOLDER/bin
 cp lib/saxon9he.jar $JAVA_APP_FOLDER/bin
 cd $JAVA_APP_FOLDER/bin
 #jar cf declarationXmlParsing.jar bin/* lib/*
-unzip jar-in-jar-loader.zip
+if ([ ! -d "$JAVA_APP_FOLDER/bin/org" ]); then
+    unzip jar-in-jar-loader.zip
+fi
 jar cvmf MANIFEST.MF declarationXmlParsing.jar declaration/Main.class declaration/DeclarationModel.class declaration/DeclarationVariableResolver.class org/* saxon9he.jar
 
 # Deploying the newly created JAR file into the script folder

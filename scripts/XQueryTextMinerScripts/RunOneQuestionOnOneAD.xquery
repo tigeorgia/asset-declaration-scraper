@@ -12,7 +12,7 @@
           :)
 
 
-import module namespace tiADQ = "http://transparency.ge/AssetDeclaration/FunctionsForEachCSVFile" at "/home/etienne/asset-declaration-scraper/scripts/XQueryTextMinerScripts/FunctionsForEachCSVFile.xquery";
+import module namespace tiADQ = "http://transparency.ge/AssetDeclaration/FunctionsForEachCSVFile" at "scraper.ad.functionxquery.toreplace";
 
 declare variable $QuestionID external; (: between 0 and 11 :)
 declare variable $Language external; (: eng OR geo :)

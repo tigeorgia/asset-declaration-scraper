@@ -12,7 +12,7 @@
           :)
 
 
-import module namespace tiAD= "http://transparency.ge/AssetDeclaration" at "/home/etienne/asset-declaration-scraper/scripts/XQueryTextMinerScripts/AssetDeclaration.xquery";
+import module namespace tiAD= "http://transparency.ge/AssetDeclaration" at "scraper.ad.assetdeclaration.toreplace";
 
 declare variable $QuestionID external; (: between 0 and 11 :)
 declare variable $Language external; (: eng OR geo :)

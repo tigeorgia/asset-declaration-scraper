@@ -38,6 +38,7 @@ public class Main {
 	private final static String GEORGIAN_LANGUAGE_IN_XQUERY = "geo";
 	private final static String CSV_TYPE = "csv";
 	private final static String AD_INFO_XML = "AssetDeclarationsQuestionsInformation.xml";
+	private final static String FUNCTIONS_XQUERY_FILE = "FunctionsForEachCSVFile.xquery";
 	private final static String MAIN_XQUERY_FILE = "RunOneQuestionOnOneAD.xquery";
 	private final static String HEADER_XQUERY_FILE = "WriteHeaders.xquery";
 	private final static String AD_XQUERY_FILE = "AssetDeclaration.xquery";
@@ -71,9 +72,10 @@ public class Main {
     	try {
     		prop.load(new FileInputStream(args[4]));
     		
-    		questionInfo = prop.getProperty("scraper.ad.questionsinfo."+environment);
-    		functionxquery = prop.getProperty("scraper.ad.functionxquery."+environment);
-    		assetdeclaration = prop.getProperty("scraper.ad.assetdeclaration."+environment);
+    		String xqueryScriptsPath = prop.getProperty("scraper.ad.xqueryscripts."+environment);
+    		questionInfo = xqueryScriptsPath + "/" + AD_INFO_XML;
+    		functionxquery = xqueryScriptsPath + "/" + FUNCTIONS_XQUERY_FILE;
+    		assetdeclaration = xqueryScriptsPath + "/" + AD_XQUERY_FILE;
     		
     		File mainXqueryFile = new File(xqueryPath + "/" + MAIN_XQUERY_FILE);
     		File adXqueryFile = new File(xqueryPath + "/" + AD_XQUERY_FILE);
