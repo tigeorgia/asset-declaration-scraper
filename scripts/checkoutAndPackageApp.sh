@@ -12,7 +12,9 @@ git --work-tree=$BASEDIR --git-dir=$BASEDIR/.git pull origin $1
 # Compile the Java application
 echo "Compiling java project"
 cd $JAVA_APP_FOLDER
-#echo Main-Class: declaration.Main > MANIFEST.MF
+if ([ ! -d "$JAVA_APP_FOLDER/bin" ]); then
+    mkdir bin
+fi
 javac -d bin -sourcepath src -cp lib/saxon9he.jar src/declaration/Main.java
 
 # Package the class files and libraries into a JAR file
@@ -22,6 +24,7 @@ cp lib/saxon9he.jar $JAVA_APP_FOLDER/bin
 cd $JAVA_APP_FOLDER/bin
 #jar cf declarationXmlParsing.jar bin/* lib/*
 if ([ ! -d "$JAVA_APP_FOLDER/bin/org" ]); then
+    cp $JAVA_APP_FOLDER/resources/jar-in-jar-loader.zip .
     unzip jar-in-jar-loader.zip
 fi
 jar cvmf MANIFEST.MF declarationXmlParsing.jar declaration/Main.class declaration/DeclarationModel.class declaration/DeclarationVariableResolver.class org/* saxon9he.jar
