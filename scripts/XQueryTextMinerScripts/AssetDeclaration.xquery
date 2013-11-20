@@ -13,8 +13,9 @@ declare variable $tiAD:attribution := "Created by Maarten Marx for TI Georgia. 2
 
 
 
-(: get the Document ID from a document :)
-declare function tiAD:GetDocID($doc){normalize-space($doc//page[1]//text[matches(normalize-space(.),'^#\d+')])};
+(: get the Document ID from a document 
+  We take the first text element from the first page which mathes the regex ^#\d+$ :)
+declare function tiAD:GetDocID($doc){normalize-space($doc//page[1]//text[matches(normalize-space(.),'^#\d+$')][1])};
 
 
 (: Functions implementing the steps taken by tiAD:WriteRawXML($doc,$questionNumber) :)
