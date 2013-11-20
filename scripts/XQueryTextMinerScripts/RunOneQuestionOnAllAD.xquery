@@ -8,18 +8,18 @@
           
           :)
 
-  
+import module namespace tiADQ = "http://transparency.ge/AssetDeclaration/FunctionsForEachCSVFile" at "/home/etienne/asset-declaration-scraper/scripts/XQueryTextMinerScripts/FunctionsForEachCSVFile.xquery";
 
-import module namespace tiADQ = "http://transparency.ge/AssetDeclaration/FunctionsForEachCSVFile" at "FunctionsForEachCSVFile.xquery";
  
- 
-   declare variable $XMLstore := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources/';
-  (:   declare variable $GEOXMLstore := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/GEOXML/ka'; :)
+declare variable $QuestionID external; (: between 0 and 11 :)
+declare variable $Language external; (: eng OR geo :)
+declare variable $outputtype external; (: xml OR csv :)
+declare variable $XMLstore external; (: := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources/'; :)
+declare variable $Filename external;
 
-  let $col :=   collection($XMLstore)  (: subsequence(collection($XMLstore) ,1,100)  :)
-  
-return
-  
-    tiADQ:ExtractTextToFile($col,2,'geo','csv','ADbank_accounts')   
+let $col := collection($XMLstore)
+
+return tiADQ:ExtractTextToFile($col,$QuestionID,$Language,$outputtype,$Filename)
+ 
   
  

@@ -12,15 +12,14 @@
           :)
 
 
-import module namespace tiADQ = "http://transparency.ge/AssetDeclaration/FunctionsForEachCSVFile" at "scraper.ad.functionxquery.toreplace";
+import module namespace tiAD= "http://transparency.ge/AssetDeclaration" at "scraper.ad.assetdeclaration.toreplace";
 
 declare variable $QuestionID external; (: between 0 and 11 :)
 declare variable $Language external; (: eng OR geo :)
 declare variable $outputtype external; (: xml OR csv :)
-declare variable $DocID external; (: just the ID :)
 declare variable $XMLstore  external ; (: := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources/'; :)
+declare variable $Filename external;
 
-let $doc := doc(concat($XMLstore,'/',$DocID,'.xml'))
+let $col := collection($XMLstore)
 
-return  tiADQ:ExtractText($doc,$QuestionID,$Language,$outputtype)  
-  
+return  tiAD:WriteHeader($col,$QuestionID,$Language,$outputtype,$Filename)

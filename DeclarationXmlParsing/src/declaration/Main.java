@@ -34,9 +34,13 @@ public class Main {
 
 	private final static String ENGLISH_LANGUAGE = "en";
 	private final static String GEORGIAN_LANGUAGE = "ka";
+	private final static String ENGLISH_LANGUAGE_IN_XQUERY = "eng";
+	private final static String GEORGIAN_LANGUAGE_IN_XQUERY = "geo";
 	private final static String CSV_TYPE = "csv";
 	private final static String AD_INFO_XML = "AssetDeclarationsQuestionsInformation.xml";
+	private final static String FUNCTIONS_XQUERY_FILE = "FunctionsForEachCSVFile.xquery";
 	private final static String MAIN_XQUERY_FILE = "RunOneQuestionOnOneAD.xquery";
+	private final static String HEADER_XQUERY_FILE = "WriteHeaders.xquery";
 	private final static String AD_XQUERY_FILE = "AssetDeclaration.xquery";
 	
 	private final static String CSV_NAME_XPATH_EXPR = "//q[@n=$QuestionID]/@t";
@@ -63,18 +67,23 @@ public class Main {
 		
 		String questionInfo = null;
 		String functionxquery = null;
+		String assetdeclaration = null;
 		 
     	try {
     		prop.load(new FileInputStream(args[4]));
     		
-    		questionInfo = prop.getProperty("scraper.ad.questionsinfo."+environment);
-    		functionxquery = prop.getProperty("scraper.ad.functionxquery."+environment);
+    		String xqueryScriptsPath = prop.getProperty("scraper.ad.xqueryscripts."+environment);
+    		questionInfo = xqueryScriptsPath + "/" + AD_INFO_XML;
+    		functionxquery = xqueryScriptsPath + "/" + FUNCTIONS_XQUERY_FILE;
+    		assetdeclaration = xqueryScriptsPath + "/" + AD_XQUERY_FILE;
     		
     		File mainXqueryFile = new File(xqueryPath + "/" + MAIN_XQUERY_FILE);
     		File adXqueryFile = new File(xqueryPath + "/" + AD_XQUERY_FILE);
+    		File writeHeadersXqueryFile = new File(xqueryPath + "/" + HEADER_XQUERY_FILE);
     		
     		replaceSelected(mainXqueryFile, "scraper.ad.functionxquery.toreplace", functionxquery);
     		replaceSelected(adXqueryFile, "scraper.ad.questionsinfo.toreplace", questionInfo);
+    		replaceSelected(writeHeadersXqueryFile, "scraper.ad.assetdeclaration.toreplace", assetdeclaration);
  
     		generateCsvFiles(args);
     		System.out.println("Done. The CSV files are in " + args[2]);
@@ -82,13 +91,20 @@ public class Main {
     		// Re-initializing config files (ie revert the changes made previously, for the execution of generateCsvFiles())
     		replaceSelected(mainXqueryFile, functionxquery, "scraper.ad.functionxquery.toreplace");
     		replaceSelected(adXqueryFile, questionInfo, "scraper.ad.questionsinfo.toreplace");
-    		
+    		replaceSelected(writeHeadersXqueryFile, assetdeclaration, "scraper.ad.assetdeclaration.toreplace");
     		
     	} catch (IOException ex) {
     		ex.printStackTrace();
         }
 	}
 	
+	/**
+	 * Method that replaces values in XQuery files, by whatever is in config.properties.
+	 * @param file
+	 * @param toReplace
+	 * @param replacement
+	 * @throws IOException
+	 */
 	public static void replaceSelected(File file, String toReplace, String replacement) throws IOException {
 
 	    // we need to store all the lines
@@ -158,7 +174,6 @@ public class Main {
 	}
 
 	private static void generateCsvFilesPerLanguage(String[] args, String lang, String csvName, String questionid) {
-		SaxonXQDataSource ds = new SaxonXQDataSource();
 		XQPreparedExpression expr = null;
 		XQConnection conn = null;
 
@@ -169,27 +184,36 @@ public class Main {
 		String completeXMLPath = xmlInputPath + "/" + lang;
 
 		try {
+			SaxonXQDataSource ds = new SaxonXQDataSource();
 			conn = ds.getConnection();
-			expr = conn.prepareExpression(new FileInputStream(xqueryPath + "/" + MAIN_XQUERY_FILE));		
-
-			File[] files = new File(completeXMLPath).listFiles();
 			
+			String languageInXquery = null;
+			if (lang.equalsIgnoreCase(ENGLISH_LANGUAGE)){
+				languageInXquery = ENGLISH_LANGUAGE_IN_XQUERY;
+			}else if (lang.equalsIgnoreCase(GEORGIAN_LANGUAGE)){
+				languageInXquery = GEORGIAN_LANGUAGE_IN_XQUERY;
+			}
+			
+			// Get the CSV file ready
 			FileWriter result = new FileWriter(csvFolderPath + "/"+ lang + "/" + csvName+"_"+lang+".csv");
 
+			// Creation of the file header
+			DeclarationModel declarationInfo = new DeclarationModel(CSV_TYPE, questionid, completeXMLPath, languageInXquery, csvName, null);
+			expr = getExpression(conn, declarationInfo, xqueryPath + "/" + HEADER_XQUERY_FILE);
+			XQResultSequence xqjs  = expr.executeQuery();
+			xqjs.writeSequence(result, null);
+			
+			// Creation of the file body
+			File[] files = new File(completeXMLPath).listFiles();
 			for (File file : files) {
 				if (file.isFile()) {
 
 					String filename = file.getName();
 					String fileId = filename.replaceAll(".xml", "");
-					
-					expr.bindAtomicValue(new QName("outputtype"), CSV_TYPE, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
-					expr.bindAtomicValue(new QName("QuestionID"), questionid, conn.createAtomicType(XQItemType.XQBASETYPE_INTEGER));
-					expr.bindAtomicValue(new QName("DocID"), fileId, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
-					expr.bindAtomicValue(new QName("XMLstore"), completeXMLPath, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
-					expr.bindAtomicValue(new QName("XMLstore"), completeXMLPath, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
-					
-					
-					XQResultSequence xqjs  = expr.executeQuery();
+					declarationInfo.setDocId(fileId);
+					declarationInfo.setFilename(null);
+					expr = getExpression(conn, declarationInfo, xqueryPath + "/" + MAIN_XQUERY_FILE);
+					xqjs  = expr.executeQuery();
 
 					xqjs.writeSequence(result, null);
 
@@ -200,7 +224,9 @@ public class Main {
 			
 			System.out.println("File " + csvName + "_" + lang +".csv has been generated");
 
-			conn.close();	    			
+			if (conn != null){
+				conn.close();
+			}
 
 		} catch (FileNotFoundException e) {
 			System.out.println("ERROR: The XQuery file was not found!");
@@ -213,5 +239,26 @@ public class Main {
 			e.printStackTrace();
 		} 
 	}
+	
+	private static XQPreparedExpression getExpression(XQConnection conn, DeclarationModel model, String XQueryFile) throws FileNotFoundException, XQException{
+
+		XQPreparedExpression expr = conn.prepareExpression(new FileInputStream(XQueryFile));	
+		
+		expr.bindAtomicValue(new QName("outputtype"), model.getType(), conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+		expr.bindAtomicValue(new QName("QuestionID"), model.getQuestionId(), conn.createAtomicType(XQItemType.XQBASETYPE_INTEGER));
+		expr.bindAtomicValue(new QName("XMLstore"), model.getXmlStore(), conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+		expr.bindAtomicValue(new QName("Language"), model.getLanguage(), conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+		
+		if (model.getFilename() != null){
+			expr.bindAtomicValue(new QName("Filename"), model.getFilename(), conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+		}
+		
+		if (model.getDocId() != null){
+			expr.bindAtomicValue(new QName("DocID"), model.getDocId(), conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+		}
+		
+		return expr;
+	}
+	
 
 }
