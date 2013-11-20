@@ -14,11 +14,12 @@ import module namespace tiADQ = "http://transparency.ge/AssetDeclaration/Functio
  
  
    declare variable $XMLstore := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources/';
+  (:   declare variable $GEOXMLstore := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/GEOXML/ka'; :)
 
   let $col :=   collection($XMLstore)  (: subsequence(collection($XMLstore) ,1,100)  :)
-  let $Language := 'eng'
+  
 return
   
-   tiADQ:ExtractTextToFile($col,5,$Language,'csv','ADbank_accounts')   
+    tiADQ:ExtractTextToFile($col,2,'geo','csv','ADbank_accounts')   
   
  
