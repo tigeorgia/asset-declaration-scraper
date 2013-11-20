@@ -41,5 +41,6 @@ $SCRIPTS_FOLDER/checkoutAndPackageApp.sh $BRANCH
 # The XML files have been generated, we can now turn them into CSV files
 $SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT
 
-
+# Archiving the newly downloaded and created files
+$SCRIPTS_FOLDER/archive.sh
 
