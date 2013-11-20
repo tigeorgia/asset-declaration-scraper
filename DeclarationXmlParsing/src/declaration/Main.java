@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -37,6 +38,7 @@ public class Main {
 	private final static String ENGLISH_LANGUAGE_IN_XQUERY = "eng";
 	private final static String GEORGIAN_LANGUAGE_IN_XQUERY = "geo";
 	private final static String CSV_TYPE = "csv";
+	private final static String XML_TYPE = "xml";
 	private final static String AD_INFO_XML = "AssetDeclarationsQuestionsInformation.xml";
 	private final static String FUNCTIONS_XQUERY_FILE = "FunctionsForEachCSVFile.xquery";
 	private final static String MAIN_XQUERY_FILE = "RunOneQuestionOnOneAD.xquery";
@@ -153,8 +155,14 @@ public class Main {
 
 				String documentName = xPath.compile(expression).evaluate(document);
 				
-				generateCsvFilesPerLanguage(args, ENGLISH_LANGUAGE, documentName, questionid);
-				generateCsvFilesPerLanguage(args, GEORGIAN_LANGUAGE, documentName, questionid);
+				// Creation of CSV files
+				generateCsvFilesPerLanguage(args, ENGLISH_LANGUAGE, documentName, questionid, CSV_TYPE);
+				generateCsvFilesPerLanguage(args, GEORGIAN_LANGUAGE, documentName, questionid, CSV_TYPE);
+				
+				// Creation of XML files
+				generateCsvFilesPerLanguage(args, ENGLISH_LANGUAGE, documentName, questionid, XML_TYPE);
+				generateCsvFilesPerLanguage(args, GEORGIAN_LANGUAGE, documentName, questionid, XML_TYPE);
+				
 			}
 			
 		} catch (ParserConfigurationException e) {
@@ -173,13 +181,15 @@ public class Main {
 
 	}
 
-	private static void generateCsvFilesPerLanguage(String[] args, String lang, String csvName, String questionid) {
+	private static void generateCsvFilesPerLanguage(String[] args, String lang, String documentName, String questionid, String type) {
 		XQPreparedExpression expr = null;
 		XQConnection conn = null;
+		XQResultSequence xqjs = null;
+		String completeFilePath = null;
 
 		String xqueryPath = args[0];
 		String xmlInputPath = args[1];
-		String csvFolderPath = args[2];
+		String outputFolderPath = args[2];
 
 		String completeXMLPath = xmlInputPath + "/" + lang;
 
@@ -194,14 +204,43 @@ public class Main {
 				languageInXquery = GEORGIAN_LANGUAGE_IN_XQUERY;
 			}
 			
+			// Make sure that there is no space in file name, that would make the xmllint test fail.
+			documentName = documentName.replaceAll(" ", "_");
+			
 			// Get the CSV file ready
-			FileWriter result = new FileWriter(csvFolderPath + "/"+ lang + "/" + csvName+"_"+lang+".csv");
-
-			// Creation of the file header
-			DeclarationModel declarationInfo = new DeclarationModel(CSV_TYPE, questionid, completeXMLPath, languageInXquery, csvName, null);
-			expr = getExpression(conn, declarationInfo, xqueryPath + "/" + HEADER_XQUERY_FILE);
-			XQResultSequence xqjs  = expr.executeQuery();
-			xqjs.writeSequence(result, null);
+			completeFilePath = outputFolderPath + "/"+ type + "/" + lang + "/" + documentName+"_"+lang+"."+type;
+			
+			// We first see if it is a new file or not
+			File fileTest = new File(completeFilePath);
+			Boolean isNewFile = !fileTest.exists();
+			
+			FileWriter result = null;
+			if (isNewFile){
+				// We create a file from scratch
+				result = new FileWriter(completeFilePath);
+			}else{
+				// We append to the existing file
+				result = new FileWriter(completeFilePath, true);
+			}
+			
+			DeclarationModel declarationInfo = new DeclarationModel(type, questionid, completeXMLPath, languageInXquery, documentName, null);
+			
+			// Creation of the file header (only if it is a new file)
+			if (isNewFile){
+				if (type.equalsIgnoreCase(XML_TYPE)){
+					result.write("<table name='"+documentName+"'>");
+				}
+				
+				expr = getExpression(conn, declarationInfo, xqueryPath + "/" + HEADER_XQUERY_FILE);
+				xqjs  = expr.executeQuery();
+				xqjs.writeSequence(result, null);
+			}
+			
+			if (!isNewFile && type.equalsIgnoreCase(XML_TYPE)){
+				// The last line of an existing XML file is </table>. If we want to append new information,
+				// we need to remove this tag. We'll add it back later.
+				removeLastLine(completeFilePath);
+			}
 			
 			// Creation of the file body
 			File[] files = new File(completeXMLPath).listFiles();
@@ -219,10 +258,19 @@ public class Main {
 
 				}
 			}
+			
+			if (type.equalsIgnoreCase(XML_TYPE)){
+				result.write("\n</table>");
+			}
+			
 			result.flush();
 			result.close();
 			
-			System.out.println("File " + csvName + "_" + lang +".csv has been generated");
+			if (isNewFile){
+				System.out.println("File " + documentName + "_" + lang +"."+type+" has been generated");
+			}else{
+				System.out.println("File " + documentName + "_" + lang +"."+type+" has been updated");
+			}
 
 			if (conn != null){
 				conn.close();
@@ -235,7 +283,7 @@ public class Main {
 			System.out.println("ERROR: problem occured while using Saxon fucntionalities! Please check your inputs.");
 			e.printStackTrace();
 		} catch (IOException e) {
-			System.out.println("ERROR: problem occured while writing a CSV file!");
+			System.out.println("ERROR: problem occured while writing a CSV file: " + completeFilePath);
 			e.printStackTrace();
 		} 
 	}
@@ -258,6 +306,19 @@ public class Main {
 		}
 		
 		return expr;
+	}
+	
+	private static void removeLastLine(String completeFilePath) throws IOException{
+		RandomAccessFile f = new RandomAccessFile(completeFilePath, "rw");
+		long length = f.length() - 1;
+		byte b;
+		do {                     
+		  length -= 1;
+		  f.seek(length);
+		  b = f.readByte();
+		} while(b != 10);
+		f.setLength(length+1);
+		f.close();
 	}
 	
 
