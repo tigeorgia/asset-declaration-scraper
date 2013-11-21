@@ -22,9 +22,9 @@ if (count($fnln)=2)  (: just a first name and a last name :)
 
 (: Creating CSV file functions :)
 
-declare function tiUtil:pad($td){if ($td) then $td else ' '};
+declare function tiUtil:pad($td){if ($td) then $td else ' '};   
 
-
+declare function tiUtil:RemoveDoubleQuotes($s){replace($s,'"',' ')};
 
 (: text writing functions :)
 

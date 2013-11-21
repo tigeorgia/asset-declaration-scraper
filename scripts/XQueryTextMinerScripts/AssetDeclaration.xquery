@@ -4,8 +4,8 @@ declare namespace ti = "http://transparency.ge";
 
 import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "XMLUtilities.xquery";
 
-(: declare variable $tiAD:QI := doc(' AssetDeclarationsQuestionsInformation.xml'); :)
-declare variable $tiAD:QI := doc('scraper.ad.questionsinfo.toreplace');  
+ declare variable $tiAD:QI := doc(' AssetDeclarationsQuestionsInformation.xml'); 
+(: declare variable $tiAD:QI := doc('scraper.ad.questionsinfo.toreplace');  :)
  
 
 
@@ -187,7 +187,7 @@ declare function tiAD:WriteCSVrowasXML($output){
 (: write one CSV row :)
 declare function tiAD:WriteCSVrow($output,$doc){
     concat('&#10;',  (: newline :)
-          string-join(($output,tiAD:GetDocID($doc))  
+          string-join((for $i in $output return tiUtil:RemoveDoubleQuotes($i),tiAD:GetDocID($doc))  
                       ,
                      '&#09;')  (: tab :) 
            ) };

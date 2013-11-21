@@ -49,7 +49,7 @@ let   $PageQuestionString := if ($Language ='eng') then  (: See step 1 :)
 let $Submitregex :=   if ($Language ='eng') then    '^Asset Declaration was submitted on:' else   '^თანამდებობის პირის დეკლარაცია შევსებულია: '                
 let $Nameregex :=   if ($Language ='eng') then    '^First Name, Last Name:$' else   '^სახელი, გვარი:' 
 let $Birthregex := if ($Language ='eng') then '^Place of Birth, Date of Birth:$' else '^დაბადების ადგილი, დაბადების თარიღი:'
-let $Orgregex := if ($Language ='eng') then '^Organisation, Position:$' else '^სამსახური, დაკავებული (ყოფილი) თანამდებობა:'
+let $Orgregex := if ($Language ='eng') then '^Organisation, Position:$' else '^სამსახური, დაკავებული'
 let $Workregex := if ($Language ='eng') then '^Work address, Phone number:$' else '^სამსახურის მისამართი, ტელეფონი:'
 
 
@@ -67,7 +67,7 @@ for $page in tiAD:GetOurPages($doc,$PageQuestionString)[1]
     let $birthdate := tiUtil:pad(tiUtil:toISOdate(replace($bdtext,'^(.*), ([0-9/]+)$','$2')))
     let $birthplace :=  tiUtil:pad(replace($bdtext,'^([^0-9/]+)([0-9/]+)$','$1'))
 (: Organisation, Position: :)
-  let $org := tiUtil:pad($page//text[matches(normalize-space(.),$Orgregex)]//following-sibling::text[1]/text())
+  let $org := tiUtil:pad(string($page//text[matches(normalize-space(.),$Orgregex)]//following-sibling::text[1]))
   
  (: Work address, Phone number:  :)
  let $work := tiUtil:pad($page//text[matches(normalize-space(.),$Workregex)]//following-sibling::text[1]/text())
@@ -126,7 +126,7 @@ then
  let $fnlnline := tokenize($tr/td[1],' +')  
     let $fnln := subsequence($fnlnline,1,2)
     let $percentage:= if ($fnlnline[3]) then subsequence($fnlnline,3,count($fnlnline)) else ' '
-let $output :=   ($fnln,$percentage, subsequence($tr/td,2,3) ) 
+    let $output :=   ($fnln,$percentage, subsequence($tr/td,2,3) ) 
     return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else
 

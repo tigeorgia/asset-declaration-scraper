@@ -36,7 +36,8 @@
 <AssetDeclarations>
 	<q n='0' t='ADheader' a='7'>
 		<w>Asset Declaration of Public Official</w>
-		<outschema>First_Name,Last_Name,Birth_Place,Birth_Date,Organisation_Position,Work_Address,Submission_Date</outschema>  <!-- $fnln,$birthplace,$birthdate, $org, $work, $submitDate  -->
+		<outschema>First_Name,Last_Name,Birth_Place,Birth_Date,Organisation_Position,Work_Address,Submission_Date</outschema> 
+		<outschemag>სახელი,გვარი,დაბადების_ადგილი,დაბადების_რიცხვი, ორგანიზაცია_პოზიცია,სამსახურის_მისამართი,შემოტანის_თარიღი</outschemag>
 	</q>
     <q n='1' t='ADfamily_relations' a='5'>
         <w><s>Data about family members (spouse, children, other persons)</s></w>
@@ -52,7 +53,8 @@
         <hg n='3'><s>დაბადების ადგილი</s></hg>
         <hg n='4'><s>დაბადების რიცხვი, თვე, წელი</s></hg>
         <hg n='5'><s>ნათესაური ან სხვაგვარი</s></hg>		
-		<outschemag>სახელი,გვარი,დაბადების ადგილი,დაბადების რიცხვი, თვე, წელი,ნათესაური ან სხვაგვარი</outschemag>
+    	<outschemag>სახელი,გვარი,დაბადების ადგილი,დაბადების რიცხვი, თნთესაური ან სხვაგვარი
+    		</outschemag>
     </q>
 	<q n='2' t='ADreal_estate' a='8'>
 	   <w><s>Do you or your family members own real estate?</s></w>
