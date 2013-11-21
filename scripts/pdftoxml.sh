@@ -5,7 +5,6 @@ BASEDIR=$PWD
 PATH_TO_SCRAPPER=$BASEDIR/declarationScrapy
 PDF_OUTPUT=$PATH_TO_SCRAPPER/output
 XML_OUTPUT=$BASEDIR/xmloutput
-CSV_OUTPUT=$BASEDIR/csvoutput
 SCRIPTS_FOLDER=$BASEDIR/scripts
 
 # Once we have the PDF, we need to convert them into XML files
