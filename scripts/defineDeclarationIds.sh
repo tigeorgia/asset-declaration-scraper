@@ -24,7 +24,7 @@ if [[ $TOTALCOUNT != *[!0-9]* ]]; then
 	while [ $PAGECOUNT -le $TOTALCOUNT ]
 	do
 		echo "Parsing $SRCPAGE$PAGECOUNT" >> logfile
-		$CURL $SRCPAGE$PAGECOUNT | grep 'declaration.php?id=' > $OUTPUT/tmpcount.txt
+		$CURL $SRCPAGE$PAGECOUNT | grep 'declaration?id=' > $OUTPUT/tmpcount.txt
 		while read p; do
 			ID=$(echo $p | cut -d '=' -f 3 | cut -d "'" -f 1)
 			echo "$ID" >> $OUTPUT/idlist
