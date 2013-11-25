@@ -30,13 +30,13 @@ $SCRIPTS_FOLDER/checkoutAndPackageApp.sh $BRANCH
 # Get all the ids from declaration.gov.ge, and make a diff with the most available id list ($1), 
 # in order to define what are the new documents that have been posted, since the last time 
 # this script had run
-#$SCRIPTS_FOLDER/defineNewIds.sh $1
+$SCRIPTS_FOLDER/defineNewIds.sh $1
 
 # Download the new PDFs, based on the really new ids.
-#$SCRIPTS_FOLDER/downloadpdf.sh
+$SCRIPTS_FOLDER/downloadpdf.sh
 
 # Once we have the PDF, we need to convert them into XML files
-#$SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
+$SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 
 # The XML files have been generated, we can now turn them into CSV files
 $SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT
