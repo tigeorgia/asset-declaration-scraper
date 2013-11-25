@@ -12,7 +12,7 @@ import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "XMLUt
 declare function       tiADQ:ExtractTextToFile($col,$QuestionID,$Language, $OutputFormat,$Outputfile){
 if ($OutputFormat='xml') 
 then
-<table name='{tiAD:TableName($QuestionID)}'>
+<table name='{tiAD:TableName($QuestionID)}' language='{$Language}'>
 {
 tiAD:WriteHeader($col,$QuestionID,$Language,$OutputFormat,$Outputfile),
 for $doc in  $col 
@@ -132,8 +132,8 @@ else
 
 if ($QuestionIdentifier=4)
 then
-let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($tr/td,2,2),tiUtil:toAmountWithMoneyUnit($tr/td[4]) ) 
-    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
+let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($tr/td,2,2),  tiUtil:toAmountWithMoneyUnit($tr/td[4]), string($tr/td[5]) ) 
+    return   $tr (: tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier) :)
 else
 
 if ($QuestionIdentifier=5)
@@ -149,9 +149,18 @@ let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]), tiUtil:toAmo
 else
 
 if ($QuestionIdentifier=7)
-then
-let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),  subsequence($tr/td,2,4)  ,tiUtil:toAmountWithMoneyUnit($tr/td[6]) ) 
-    return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
+then  (: for Georgian we do something a little different than for English.
+         This is because with the Georgian CSV's this question does not work, because there are two columns whose first line of the header is equal.
+         And our recogniser breaks with this.
+         We did not expect this, and we did not code for it. 
+         :)
+    if ($Language='eng')
+    then
+        let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),   subsequence($tr/td,2,4)  ,tiUtil:toAmountWithMoneyUnit($tr/td[6]) ) 
+        return    tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
+    else 
+        let $output := (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),   subsequence($tr/td,2,1),for $i in 1 to 5 return 'missing data (not missing in English version)' )
+        return    tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier) 
 else
 if ($QuestionIdentifier=8)
 then
@@ -193,7 +202,7 @@ then
 return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)
 else
 
-if ($QuestionIdentifier=11)
+if ($QuestionIdentifier=11)  (: the last question needs extra care, otherwise it outputs a weird empty csvrow :)
 then
 let $output :=   (tiUtil:ParseStringToFirstNameLastName($tr/td[1]),subsequence($tr/td,2,1),tiUtil:toAmountWithMoneyUnit($tr/td[last()]) ) 
     return tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionIdentifier)

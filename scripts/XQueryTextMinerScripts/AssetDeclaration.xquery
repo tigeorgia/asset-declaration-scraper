@@ -30,7 +30,8 @@ $doc//page[.//text[tiAD:MatchColumnName(.,$PageQuestionString)]]};
 declare function tiAD:GetLines($page,$PageQuestionString){
                         $page//text[not(b)]
                               [not(matches(.,'^www.declaration.gov.ge$'))]
-                              [not(matches(.,'^[0-9# ]*$'))]
+                              [not(matches(.,'^[0-9# ]*#[0-9# ]*$'))]  (: it must contain at least a # and further numbers and spaces :)
+                              [not(.//a)]   (: we want not to match the textline which pdftohtml put is : <a href="http://www.tcpdf.org">Powered by TCPDF (www.tcpdf.org)</a>  :)
                               [preceding::text[tiAD:MatchColumnName(.,$PageQuestionString)]]
                               };
                               
@@ -72,7 +73,7 @@ declare function tiAD:startCol($QuestionNumber,$Language, $ColumnNumber,$page){
     let $q := $tiAD:QI//q[@n=$QuestionNumber]
     let $column := if ($Language='geo') then $q//hg else $q//h
     let $headerText := $column[@n=$ColumnNumber]/s
-    let $matchingtext := $page//text[./b[tiAD:MatchColumnName(.,$headerText)]]
+    let $matchingtext := ($page//text[./b[tiAD:MatchColumnName(.,$headerText)]])[1]
     return
  xs:integer($matchingtext/@left)};
  
@@ -80,7 +81,7 @@ declare function tiAD:startCol($QuestionNumber,$Language, $ColumnNumber,$page){
     let $q := $tiAD:QI//q[@n=$QuestionNumber]
     let $column := if ($Language='geo') then $q//hg else $q//h
     let $headerText := $column[@n=$ColumnNumber]/s
-    let $matchingtext := $page//text[./b[tiAD:MatchColumnName(.,$headerText)]]
+    let $matchingtext := ($page//text[./b[tiAD:MatchColumnName(.,$headerText)]])[1]
     return
  xs:integer($matchingtext/@left) + xs:integer($matchingtext/@width)};
  
@@ -94,10 +95,10 @@ return
 (: the first column: end of tekst is before the start of the second column :)
 if ($n/@n =1) then tiUtil:tostring($lines[xs:integer(@left)+xs:integer(@width) lt tiAD:startCol($questionNumber,$Language,xs:integer($n/@n)+1,$page)] )
 else
-(: the last column: start of tekst is before the end of preceding column :)
+(: the last column: start of tekst is after  the end of preceding column :)
 if ($n/@n=$NrofColumns) then tiUtil:tostring($lines[xs:integer(@left) gt tiAD:endCol($questionNumber,$Language,xs:integer($n/@n)-1,$page) ])
 else
-(: end of tekst is before the start of the following column AND start of tekst is before the end of preceding column :)
+(: end of tekst is before the start of the following column AND start of tekst is after the end of preceding column :)
 tiUtil:tostring($lines[xs:integer(@left) +xs:integer(@width) lt tiAD:startCol($questionNumber,$Language,xs:integer($n/@n)+1,$page)]
       [xs:integer(@left) gt tiAD:endCol($questionNumber,$Language,xs:integer($n/@n)-1,$page) ] )
 
@@ -158,7 +159,8 @@ declare function tiAD:MatchColumnName($string,$headerText){
 let $s := normalize-space($string)
 let $head := normalize-space($headerText)
 return
- starts-with($s,$head)  };
+ starts-with($s,$head) };
+  
  
  (: Only output a row for a $QuestionID if it is of the correct arity :)
 declare function tiAD:WriteAritySaferow($output,$doc,$Outputformat,$QuestionID){
@@ -182,7 +184,7 @@ declare function tiAD:Writerow($output,$doc,$Outputformat){
         };
 
 declare function tiAD:WriteCSVrowasXML($output){
-    for $i in $output return <td>{normalize-space($i)}</td> };
+    for $i in $output return <td>{normalize-space(string($i))}</td> };
     
 (: write one CSV row :)
 declare function tiAD:WriteCSVrow($output,$doc){
@@ -212,7 +214,8 @@ declare function tiAD:WriteHeader($col,$QuestionID,$Language,$OutputFormat,$Outp
 let $header := 
 concat('&#10;#File: ',$Outputfile,
 '&#10;#',$tiAD:attribution,'&#10;',
-'#',"Information mined from AssetDeclarations", '&#10;&#10;',
+'#',"Information mined from AssetDeclarations", '&#10;',
+'# English: https://declaration.gov.ge/eng/declaration.php?id=$DocID &#10;# Georgian: https://declaration.gov.ge/declaration.php?id=$DocID (for $DocID fill in number (like 48303). &#10;',
 '# LANGUAGE: ', $Language,'&#10;',
 '# QUESTION: ', string($tiAD:QI//q[@n=$QuestionID]//w),'&#10;',
 '# TABLE NAME: ',string(tiAD:TableName($QuestionID)),'&#10;',

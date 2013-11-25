@@ -4,11 +4,11 @@ module namespace tiUtil= "http://transparency.ge/XML-Utilities";
 (: helper functions :)
 
 declare function tiUtil:NotEmpty($s){ if ($s) then $s else ' '};
-declare function tiUtil:tostring($list){normalize-space(string-join( for $t in $list return normalize-space($t),' '))};
+declare function tiUtil:tostring($list){normalize-space(string-join( for $t in $list return normalize-space(string($t)),' '))};
 declare function tiUtil:toISOdate($date){ let $cleandate:= replace($date,'[^0-9/-]','') return replace($cleandate,'(..)/(..)/(....)','$3-$2-$1')};
 declare function tiUtil:toAmountWithMoneyUnit($money){
-    let $amount := tiUtil:NotEmpty(replace($money,'[^0-9.]',''))
-    let $Unit := tiUtil:NotEmpty(replace($money,'[0-9.]',''))
+    let $amount :=  replace($money,'[^0-9.]','') (: tiUtil:NotEmpty(replace($money,'[^0-9.]','')) :)
+    let $Unit := replace($money,'[0-9- .]','')   (: tiUtil:NotEmpty(replace($money,'[0-9.]','')) :)
         return (tiUtil:pad($amount),tiUtil:pad($Unit))};
 
 (: create 2 columns first-name;last-name out of a string :)
