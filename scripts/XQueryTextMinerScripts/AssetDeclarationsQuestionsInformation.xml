@@ -199,16 +199,16 @@
 		<outschemag>სახელი,გვარი,სახეობა,რაოდენობა,სიდიდე,ნათესაური ან სხვაგვარი</outschemag>
 	</q>
 	<q n='11' t='ADincome_or_expenditures' a='5'>
-       <w><s>Have you or your family members received any income or had any expenditures during the reporting period</s> (1January - 31 December) valued at more than 1,500 GEL (900 USD approximately) that you did not indicate on the pages above?</w>
-	   <h n='1'><s>First name, last name of the person who</s> had income or/and expenditures</h>
-	   <h n='2'><s>Type of income or/and expenditures</s></h>
-	   <h n='3'><s>Amount (price) of income or/and</s> expenditures</h>
+		<w><s>Have you or your family members received any income or had any expenditures during the reporting period</s> (1January - 31 December) valued at more than 1,500 GEL (900 USD approximately) that you did not indicate on the pages above?</w>
+		<h n='1'><s>First name, last name of the person who</s> had income or/and expenditures</h>
+		<h n='2'><s>Type of income or/and expenditures</s></h>
+		<h n='3'><s>Amount (price) of income or/and</s> expenditures</h>
 		<outschema>First_Name,Last_Name,Type,Amount,Dimension</outschema>
-	 
-       <wg><s>წინა წლის პირველი იანვრიდან 31 დეკემბრის ჩათვლით თქვენი ან თქვენი ოჯახის წევრის ნებისმიერი შემოსავალი ან/და გასავალი, რომლის </s> ოდენობა (ღირებულება) თითოეულ შემთხვევაში აღემატება 1500 ლარს და არ არის მითითებული ამ დეკლარაციის სხვა ფურცლებზე</wg>
-	   <hg n='1'><s>შემოსავლის/გასავლის მიმღები/გამცემი პირის </s> ვინაობა (სახელი გვარი)</hg>
-	   <hg n='2'><s>შემოსავლის ან/და გასავლის სახეობა</s></hg>
-	   <hg n='3'><s>შემოსავლის ან/და გასავლის ოდენობა</s> (ღირებულება)</hg>
+		
+		<wg><s>წინა წლის პირველი იანვრიდან 31 დეკემბრის ჩათვლით თქვენი ან თქვენი ოჯახის წევრის ნებისმიერი შემოსავალი ან/და</s> გასავალი, რომლის ოდენობა (ღირებულება) თითოეულ შემთხვევაში აღემატება 1500 ლარს და არ არის მითითებული ამ დეკლარაციის სხვა ფურცლებზე</wg>
+		<hg n='1'><s>შემოსავლის/გასავლის მიმღები/გამცემი პირის </s> ვინაობა (სახელი გვარი)</hg>
+		<hg n='2'><s>შემოსავლის ან/და გასავლის სახეობა</s></hg>
+		<hg n='3'><s>შემოსავლის ან/და გასავლის ოდენობა</s> (ღირებულება)</hg>
 		<outschemag>სახელი,გვარი,რაოდენობა,სიდიდე</outschemag>
 	</q>
 	 

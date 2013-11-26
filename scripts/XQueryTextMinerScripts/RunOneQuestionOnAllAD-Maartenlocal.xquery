@@ -20,9 +20,9 @@ declare variable $Filename external;
 
 declare variable $GEOXMLstore   := '/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/GEOXML/ka'; 
 declare variable $XMLstore   :='/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Declarations/XML-sources/'; 
-let $col := subsequence(collection($GEOXMLstore),1,100)
+let $col := subsequence(collection($GEOXMLstore),1,10000)
 
-return tiADQ:ExtractTextToFile($col,7,'geo','xml','test')
+return tiADQ:ExtractTextToFile($col,11,'geo','xml','test')
  
   
  
