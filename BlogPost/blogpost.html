@@ -1,0 +1,247 @@
+<!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Georgian Asset Declarations</title>
+    </head>
+    <body>
+        <h1>Georgian Asset Declarations</h1>
+        <a href="http://transparency.ge/en">Transparency International Georgia</a> created a database consisting of all information contained in  <em>Asset Declarations by Georgian Public Officials</em>. These are available in PDF format from <a href='https://declaration.gov.ge/eng/'>https://declaration.gov.ge/eng/</a>. An example of such of an Asset Declaration is <a href='https://declaration.gov.ge/eng/declaration?id=44171'>one by Bidzina Ivanishvili</a>. 
+        
+        In this blogpost we report on the content and the amount of information that is available in the database of Asset Declarations. 
+        The database is freely available upon request from  <a href="http://transparency.ge/en">TI Georgia</a>.
+        <!--more-->
+        
+        <h2>From data about separate  individuals to data about groups</h2>
+        The format and the manner in which the data is presented at the Government website is <em>person-centric</em>: we can view the answers to all questions of one person together in one file. That is convenient if we are interested in that one person, but less if we want to compare persons. For that reason we collected all information from the Asset Declarations and grouped it per question.
+        
+        <h4>Turning the data 90 degrees</h4>
+        Originally we had 11 thousand files each containing  data about <strong>one person </strong> for 11 different questions. Now we have 11 files containing data of <strong>all persons</strong>:  one spreadsheet for each question. 
+        This makes group analysis possible. As an example, consider the question
+        
+        
+        <blockquote>What is the ratio of man and women working in each ministery?</blockquote>
+        We can answer that by taking all Asset Declarations filed in one year, group them by Ministery, and count how many of them are by Males and how many by Females.
+        If we order the ministeries by the percentages of females working there we get the following figure. (<a href='https://www.google.com/fusiontables/DataSource?docid=1a2Y1DDtn2NQBwV9CGaMsXV_YIc3Y1TDsqOTZCZ8#chartnew:id=5'>Click here for larger figure</a>)
+        <iframe width="500" height="300" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?containerId=gviz_canvas&amp;q=select+col1%2C+col4+from+1a2Y1DDtn2NQBwV9CGaMsXV_YIc3Y1TDsqOTZCZ8+where+col2+%3D+&#39;F&#39;+order+by+col4+asc+limit+30&amp;viz=GVIZ&amp;t=COLUMN&amp;uiversion=2&amp;gco_forceIFrame=true&amp;gco_hasLabelsColumn=true&amp;gco_vAxes=%5B%7B%22title%22%3Anull%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%2C+%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%7D%2C%7B%22useFormatFromData%22%3Atrue%2C+%22viewWindow%22%3A%7B%22max%22%3Anull%2C+%22min%22%3Anull%7D%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%7D%5D&amp;gco_useFirstColumnAsDomain=true&amp;gco_isStacked=false&amp;gco_booleanRole=certainty&amp;gco_hAxis=%7B%22useFormatFromData%22%3Atrue%2C+%22minValue%22%3Anull%2C+%22maxValue%22%3Anull%2C+%22viewWindow%22%3Anull%2C+%22viewWindowMode%22%3Anull%7D&amp;gco_legend=right&amp;gco_series=%7B%220%22%3A%7B%22color%22%3A%22%23c27ba0%22%7D%7D&amp;gco_title=Percentage+of+females+working+in+each+ministry+(2012)&amp;width=500&amp;height=300"></iframe>
+        The only ministry in which the majority is female (Ministry of Culture and Monument Protection of Georgia) is quite small: 9 females and 8 males. 
+        The Ministry of Internal Affairs of Georgia has the smallest percentage of women working there and by far the largest number of people (946 males and 62 females).
+        Full data (also with absolute numbers) is available in this <a href="https://www.google.com/fusiontables/DataSource?docid=1a2Y1DDtn2NQBwV9CGaMsXV_YIc3Y1TDsqOTZCZ8#rows:id=1">Google Fusion Table</a>
+        
+        <h2>Description of the dataset</h2>
+        We know describe the dataset. It is available at <a href=''>data.transparancy.ge/AssetDeclarations</a>
+        
+        <h3>Size of the data</h3>
+        Late November 2013 we could collect 11.125 Asset Declarations (AD's), which were submitted by 5.182 different people.  We found a maximum of 6 AD's submitted by one person. One of these was Tariel Fanchulidze. 
+        
+        Each Asset Declaration consists of information about the person filing the declaration plus answers in table format to 11 questions. The total number of rows we collected for each question is given in the following table:
+        <table border='1'>
+            <tr>
+                <th>Table</th>
+                <th>Nr of rows</th>
+            </tr>
+            <tr>
+                <td>AD_active_contracts</td>
+                <td>10519</td>
+            </tr>
+            <tr>
+                <td>AD_gifts</td>
+                <td>412</td>
+            </tr>
+            <tr>
+                <td>ADbank_accounts</td>
+                <td>36936</td>
+            </tr>
+            <tr>
+                <td>ADcash</td>
+                <td>4552</td>
+            </tr>
+            <tr>
+                <td>ADentrepreneurial_activity</td>
+                <td>3042</td>
+            </tr>
+            <tr>
+                <td>ADfamily_relations</td>
+                <td>33153</td>
+            </tr>
+            
+            <tr>
+                <td>ADincome_or_expenditures</td>
+                <td>5920</td>
+            </tr>
+            <tr>
+                <td>ADmovable_property</td>
+                <td>6637</td>
+            </tr>
+            <tr>
+                <td>ADpaid_work</td>
+                <td>21182</td>
+            </tr>
+            <tr>
+                <td>ADreal_estate</td>
+                <td>32860</td>
+            </tr>
+            <tr>
+                <td>ADsecurities</td>
+                <td>587</td>
+            </tr>
+        </table>
+        
+        <h3>List of questions</h3>
+        The next table contains the questions which are asked in the Asset Declarations together with the names of the tables we store the answers in.
+        <table border="1">
+            <tr>
+                <th>Table Name</th>
+                <th>Question</th>
+            </tr>
+            <tr>
+                <td>ADfamily_relations</td>
+                <td>Data about family members (spouse, children, other persons)</td>
+            </tr>
+            <tr>
+                <td>ADreal_estate</td>
+                <td>Do you or your family members own real estate?</td>
+            </tr>
+            <tr>
+                <td>ADmovable_property</td>
+                <td>Do you or your family members own any movable property (except for cash, securities, bank deposits, etc.) valued at more than 10,000 GEL (6,100 USD approximately)?</td>
+            </tr>
+            <tr>
+                <td>ADsecurities</td>
+                <td>Do you or your family members own any securities?</td>
+            </tr>
+            <tr>
+                <td>ADbank_accounts</td>
+                <td>Do you or your family members have bank accounts in Georgian or foreign banks?</td>
+            </tr>
+            <tr>
+                <td>ADcash</td>
+                <td>Do you or your family members hold cash valued at more than 4,000 GEL (2,400 USD approximately)?</td>
+            </tr>
+            <tr>
+                <td>ADentrepreneurial_activity</td>
+                <td>Have you or your family members undertaken any type of entrepreneurial activity?</td>
+            </tr>
+            <tr>
+                <td>ADpaid_work</td>
+                <td>Have you or your family members undertaken any type of paid work in Georgia or abroad, except for working in an enterprise?</td>
+            </tr>
+            <tr>
+                <td>AD_active contracts</td>
+                <td>Have you or your family members had any active contracts dating back from 1 January, in Georgia or abroad exceeding 3,000 GEL (1,800 USD approximately)?</td>
+            </tr>
+            <tr>
+                <td>AD_gifts</td>
+                <td>Have you or your family members received any gifts valued at more than 500 GEL (300 USD approximately) during the reporting period (1 January - 31 December)?</td>
+            </tr>
+            <tr>
+                <td>ADincome_or_expenditures</td>
+                <td>Have you or your family members received any income or had any expenditures during the reporting period (1January - 31 December) valued at more than 1,500 GEL (900 USD approximately) that you did not indicate on the pages above?</td>
+            </tr>
+        </table>
+        
+        <h3>Schema  of our data base</h3>
+        The following table lists the schema for each spreadsheet corresponding to a question.
+        Note that the number of columns in the spreadsheet is often larger than the number of columns in the PDF's. This is because we separate information like <em>Name</em> into two columns <em>First Name, Last Name</em>. We also separate texts like <em>10000.00 GEL</em> or <em>800 m<sup>2</sup></em> into two columns.
+        
+        Each  line in each spreadsheet  also contains the unique number of the Asset Declaration it came from (here called "AssetDeclarationID").
+        
+        Next to the tables listed here our database contains two more spreadsheets.
+        <ol>	<li>ADheader contains the information of the person who filed the declaration. In the following format
+            <pre>
+# SCHEMA   (eng): 
+ #First_Name	Last_Name	Birth_Place	Birth_Date	Organisation_Position	Work_Address	Submission_Date	DocumentId
+# SCHEMA   (geo): 
+ #სახელი	გვარი	დაბადების_ადგილი	დაბადების_რიცხვი	 ორგანიზაცია_პოზიცია	სამსახურის_მისამართი	შემოტანის_თარიღი	DocumentId
+
+Lasha	Chkhaidze	Georgia, Tbilisi,	1980-01-22	Ministry of Internal Affairs of Georgia	Georgia, Tbilisi, Vajafshavelas 72,	2011-02-17	#3041
+Jaba	Maghlaferidze	Georgia, q. rustavi,	1977-10-02	Ministry of Internal Affairs of Georgia	Georgia, q. tbilisi, Guramishvilis gamz. 17a, 601444	2012-05-11	#6801
+Berdia	Zviadauri	Georgia, akhmeta,	1984-03-03	Akhmeta municipality Governance	Georgia, akhmeta, Cholokashvilis q#49, 577273939	2013-01-30	#44679
+Giorgi	Khachidze	Georgia, Tbilisi,	1974-02-09	Parliament of Georgia	Georgia, qutaisi, Abashidzis 26,	2013-05-15	#45956
+</pre>
+        </li>
+            <li>A spreadsheet connecting the unique ID's of each Asset Declaration to a unique ID of each person who filed the declaration. This ID is made up of the persons first and last name and date of birth.</li>
+        </ol>
+        
+        
+        
+        <table border="1">
+            <tr>
+                <th>Table Name</th>
+                <th># Columns in PDF</th>
+                <th># Columns in our Spreadsheet</th>
+                <th>Description of Columns</th>
+            </tr>
+            <tr>
+                <td>ADfamily_relations</td>
+                <td>5</td>
+                <td>6</td>
+                <td>First_Name,Last_Name,Birth_Place,Birth_Date,Family_Relation,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADreal_estate</td>
+                <td>4</td>
+                <td>9</td>
+                <td>First_Name,Last_Name,Percentage,Property_Type,Property_Description,Area,Dimension,Common_Possesion,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADmovable_property</td>
+                <td>4</td>
+                <td>7</td>
+                <td>First_Name,Last_Name,Percentage,Property_Type,Property_Description, Common_Possesion,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADsecurities</td>
+                <td>5</td>
+                <td>8</td>
+                <td>First_Name,Last_Name,Issuer,Type,Amount,Dimension,Quantity,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADbank_accounts</td>
+                <td>4</td>
+                <td>7</td>
+                <td>First_Name,Last_Name,Bank,Account_Type,Amount,Dimension,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADcash</td>
+                <td>2</td>
+                <td>5</td>
+                <td>First_Name,Last_Name, Amount,Dimension,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADentrepreneurial_activity</td>
+                <td>6</td>
+                <td>9</td>
+                <td>First_Name,Last_Name,Organisation,Form_Of_Partnership,OldCol4,OldCol5, Amount,Dimension,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADpaid_work</td>
+                <td>4</td>
+                <td>7</td>
+                <td>First_Name,Last_Name,Organisation,Job_Title, Amount,Dimension,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>AD_active contracts</td>
+                <td>4</td>
+                <td>7</td>
+                <td>First_Name,Last_Name,Old_Col_2,Old_Col_3,Amount,Dimension,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>AD_gifts</td>
+                <td>3</td>
+                <td>7</td>
+                <td>First_Name,Last_Name,Type,Amount,Dimension,Family_Relation,AssetDeclarationID</td>
+            </tr>
+            <tr>
+                <td>ADincome_or_expenditures</td>
+                <td>3</td>
+                <td>6</td>
+                <td>First_Name,Last_Name,Type,Amount,Dimension,AssetDeclarationID</td>
+            </tr>
+        </table>
+        
+        <h3>File Formats</h3>
+        The data is available in both English and Georgian, in both CSV and XML format.
+        The information in CSV and XML is exactly the same. The information for English and Georgian is the same, except for the question about entrepeneurial activities. In that file  the English version contains more data.
+    </body>
+</html>
+

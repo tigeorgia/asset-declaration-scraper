@@ -34,3 +34,13 @@ declare function tiUtil:trTOcsv($table){for $tr in $table//tr return concat('&#1
 (:Write an error message :)
 declare function tiUtil:WriteError($string){
     concat('&#10; ######################## ERROR ####################### &#10;',$string,'&#10;')};
+    
+    
+(: functions to Create Unique ID's given a first name, last name and date of birth.
+We can also turn the ID's back into the original information 
+:)
+declare function tiUtil:GiveUniqueID($firstName,$lastName,$BirthDate)
+{   string-join(for $n in string-to-codepoints(string-join(($firstName,$lastName,$BirthDate),';')) return string($n),'.')};
+
+declare function tiUtil:PersonID2Name($PersonID){
+codepoints-to-string(for $i in tokenize($PersonID,'\.') return xs:integer($i))};
