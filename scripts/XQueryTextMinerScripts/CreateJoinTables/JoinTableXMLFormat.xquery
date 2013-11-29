@@ -1,8 +1,12 @@
 declare namespace ti = "http://transparency.ge";
 
-import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "../XMLUtilities.xquery";
+(: import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "../XMLUtilities.xquery" :)
+import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "scraper.ad.xmlutilities.toreplace";
 
 declare variable $startdate := '2012-10-01';
+
+declare variable $georgianXmlOutputPath external;
+declare variable $englishXmlOutputPath external; 
 
 declare function ti:GiveUniqueID($firstName,$lastName,$BirthDate)
 {   string-join(for $n in string-to-codepoints(string-join(($firstName,$lastName,$BirthDate),';')) return string($n),'.')};
@@ -10,9 +14,11 @@ declare function ti:GiveUniqueID($firstName,$lastName,$BirthDate)
 declare function ti:PersonID2Name($PersonID){
 codepoints-to-string(for $i in tokenize($PersonID,'\.') return xs:integer($i))};
 
+(: let $colGEO := collection('/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Spreadsheets/xml/ka') :)
+(: let $colENG := collection('/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Spreadsheets/xml/en') :)
 
-let $colGEO := collection('/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Spreadsheets/xml/ka')
-let $colENG := collection('/Users/admin/Documents/TIGeorgia/DeclarationsScraper/Spreadsheets/xml/en')
+let $colGEO := collection($georgianXmlOutputPath)
+let $colENG := collection($englishXmlOutputPath)
 
 let $header := $colENG/table[@name='ADheader']
 let $GEOheader :=  $colGEO/table[@name='ADheader']

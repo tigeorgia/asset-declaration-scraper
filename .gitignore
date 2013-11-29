@@ -12,4 +12,5 @@ logfile
 newids
 sortedidlist
 *.class
+*.pyc
 
