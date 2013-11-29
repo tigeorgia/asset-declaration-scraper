@@ -76,4 +76,3 @@ where:
 - `<xml folder>` is the full path where the XML files that will be read are.
 - `<output folder>` is the full path where the generated CSV and XML files will be written in.
 - `<environment>` can either be 'dev' or 'prod', and defines the environment your scripts are running on.
-- `<action>` can either be 'main' or 'join'. Running the script with action=main will result in creating the CSV and XML related to the declaration questions. Running it with action=join will create the documents based on the join between people's names and the declaration ids. 
