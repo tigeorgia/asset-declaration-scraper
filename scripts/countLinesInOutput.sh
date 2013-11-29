@@ -12,12 +12,20 @@ fi
 WHEN=$1
 
 if [ "$WHEN" == 'before' ]; then
+    if ([ -f "$BASEDIR/countBeforeUpdate" ]); then
+        rm $BASEDIR/countBeforeUpdate
+    fi
+
     while read p; do
 	wc -l $OUTPUT_CSV_FOLDER/$p >> $BASEDIR/countBeforeUpdate
     done < $SCRIPTS_FOLDER/listOfCsvNames.csv
 fi
 
 if [ "$WHEN" == 'after' ]; then
+    if ([ -f "$BASEDIR/countAfterUpdate" ]); then
+        rm $BASEDIR/countAfterUpdate
+    fi
+
     while read p; do
 	wc -l $OUTPUT_CSV_FOLDER/$p >> $BASEDIR/countAfterUpdate
     done < $SCRIPTS_FOLDER/listOfCsvNames.csv

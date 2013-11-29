@@ -57,13 +57,23 @@ where:
 - `<pdf folder>` is the full path where the PDF files that will be read are.
 - `<xml folder>` is the full path where the generated XML files will be written in.
 
-5) This last step will run a Java program that uses the Saxon library, in order to convert XML files into CSV files, based on XQuery manipulation.
+5) This step will run a Java program that uses the Saxon library, in order to convert XML files into CSV files, based on XQuery manipulation.
 
-`./scripts/xmltocsv.sh <xml folder> <output folder> <environment>`
+`./scripts/xmltocsv.sh <xml folder> <output folder> <environment> "main"`
 
 where:
 
 - `<xml folder>` is the full path where the XML files that will be read are.
 - `<output folder>` is the full path where the generated CSV and XML files will be written in.
 - `<environment>` can either be 'dev' or 'prod', and defines the environment your scripts are running on.
- 
+
+6) This step will run this Java program again, but this time it will create CSV and XML documents related to joined information between people's name and declaration ids.
+
+`./scripts/createJoinTables.sh <xml folder> <output folder> <environment> "join"`
+
+where:
+
+- `<xml folder>` is the full path where the XML files that will be read are.
+- `<output folder>` is the full path where the generated CSV and XML files will be written in.
+- `<environment>` can either be 'dev' or 'prod', and defines the environment your scripts are running on.
+- `<action>` can either be 'main' or 'join'. Running the script with action=main will result in creating the CSV and XML related to the declaration questions. Running it with action=join will create the documents based on the join between people's names and the declaration ids. 

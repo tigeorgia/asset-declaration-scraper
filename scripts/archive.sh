@@ -27,24 +27,26 @@ fi
 
 # Archiving the new declaration ids
 now=$(date +'%Y-%m-%d')
-#cp $BASEDIR/"declarationids-"$now $BASEDIR/archive/declarationids/
+cp $BASEDIR/"declarationids-"$now $BASEDIR/archive/declarationids/
 
 # Archiving downloaded PDF files
 echo "Archiving PDF files..."
-#mv $PDF_OUTPUT/en/* $BASEDIR/archive/pdf/en/
-#mv $PDF_OUTPUT/ka/* $BASEDIR/archive/pdf/ka/
+mv $PDF_OUTPUT/en/* $BASEDIR/archive/pdf/en/
+mv $PDF_OUTPUT/ka/* $BASEDIR/archive/pdf/ka/
 
 # Archiving XMl files, created from the PDF files
 echo "Archiving XML files created from PDF files..."
-#mv $XML_OUTPUT/en/* $BASEDIR/archive/xml/en/
-#mv $XML_OUTPUT/ka/* $BASEDIR/archive/xml/ka/
+mv $XML_OUTPUT/en/* $BASEDIR/archive/xml/en/
+mv $XML_OUTPUT/ka/* $BASEDIR/archive/xml/ka/
 
 # Archiving/replacing CSV and XML output files
-#echo "Archiving output files..."
-#cp -f $OUTPUT/csv/en/* $BASEDIR/archive/output/csv/en/
-#cp -f $OUTPUT/csv/ka/* $BASEDIR/archive/output/csv/ka/
-#cp -f $OUTPUT/xml/en/* $BASEDIR/archive/output/xml/en/
-#cp -f $OUTPUT/xml/ka/* $BASEDIR/archive/output/xml/ka/
+echo "Archiving output files..."
+cp -f $OUTPUT/csv/en/* $BASEDIR/archive/output/csv/en/
+cp -f $OUTPUT/csv/ka/* $BASEDIR/archive/output/csv/ka/
+cp -f $OUTPUT/xml/en/* $BASEDIR/archive/output/xml/en/
+cp -f $OUTPUT/xml/ka/* $BASEDIR/archive/output/xml/ka/
+cp -f $OUTPUT/csv/JoinResults.csv $BASEDIR/archive/output/csv/
+cp -f $OUTPUT/xml/JoinResults.xml $BASEDIR/archive/output/xml/
 
 echo "Done. The files have been archived in "$BASEDIR"/archive"
 echo "Sending report e-mail"

@@ -13,4 +13,6 @@ newids
 sortedidlist
 *.class
 *.pyc
+countBeforeUpdate
+countAfterUpdate
 
