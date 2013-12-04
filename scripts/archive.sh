@@ -70,15 +70,11 @@ while read p; do
     echo "$p: $numLines line(s) added" >> emailToSend
 done < $SCRIPTS_FOLDER/listOfCsvNames.csv
 
-# Sending e-mail report
-SUBJECT="Asset Declaration Scraper report - $now"
-EMAIL="etiennebaque@gmail.com"
+# We are not sending the e-mail yet, we need a valid e-mail account for this.
 
-/usr/bin/mail -s "$SUBJECT" "$EMAIL" < emailToSend
-
+# Delete the temporary files used for counts.
 rm $BASEDIR/countBeforeUpdate
 rm $BASEDIR/countAfterUpdate
-rm emailToSend
 
-echo "e-mail sent"
+echo "Archiving done."
 
