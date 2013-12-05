@@ -29,7 +29,7 @@ Running the scripts
 
 To run the entire process (all the 4 steps), run the following script, from the root of the project:
 
-`./scripts/complete.sh <list of declaration ids> (-noupdate)`
+`./scripts/complete.sh`
 
 where `<list of declaration ids>` is a file that contains all the declaration ids crawled from a previous run. 
 

@@ -5,11 +5,10 @@ SCRIPTS_FOLDER=$BASEDIR/scripts
 JAVA_APP_FOLDER=$BASEDIR/DeclarationXmlParsing
 
 # Downloading from Github the latest changes
-#echo "Updating project from Github"
-if ($2 == '-noupdate'); then
-    git checkout $1
-    git --work-tree=$BASEDIR --git-dir=$BASEDIR/.git pull origin $1
-fi
+echo "Updating project from Github"
+git checkout $1
+git --work-tree=$BASEDIR --git-dir=$BASEDIR/.git pull origin $1
+
 
 # Compile the Java application
 echo "Compiling java project"

@@ -25,9 +25,10 @@ if ([ ! -d "$BASEDIR/archive" ]); then
     mkdir $BASEDIR/archive/output/csv/ka
 fi
 
-# Archiving the new declaration ids
+# Archiving the new declaration ids file, and also making it the new current declaration id file, to be used for the next scraping.
 now=$(date +'%Y-%m-%d')
 cp $BASEDIR/"declarationids-"$now $BASEDIR/archive/declarationids/
+mv $BASEDIR/"declarationids-"$now $BASEDIR/"currentdeclarationids"
 
 # Archiving downloaded PDF files
 echo "Archiving PDF files..."

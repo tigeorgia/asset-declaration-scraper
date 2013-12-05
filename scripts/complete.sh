@@ -18,19 +18,13 @@ XML_OUTPUT=$BASEDIR/xmloutput
 OUTPUT=$BASEDIR/output
 SCRIPTS_FOLDER=$BASEDIR/scripts
 
-if [ $# -lt 1 ]
-    then
-        echo "usage: complete.sh <most available id list>"
-        exit 1
-fi
-
 # Compile and package the Java application.
 $SCRIPTS_FOLDER/checkoutAndPackageApp.sh $BRANCH
 
 # Get all the ids from declaration.gov.ge, and make a diff with the most available id list ($1), 
 # in order to define what are the new documents that have been posted, since the last time 
 # this script had run
-$SCRIPTS_FOLDER/defineNewIds.sh $1
+$SCRIPTS_FOLDER/defineNewIds.sh
 
 # Download the new PDFs, based on the really new ids.
 $SCRIPTS_FOLDER/downloadpdf.sh
