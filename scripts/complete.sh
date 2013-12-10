@@ -18,19 +18,13 @@ XML_OUTPUT=$BASEDIR/xmloutput
 OUTPUT=$BASEDIR/output
 SCRIPTS_FOLDER=$BASEDIR/scripts
 
-if [ $# -lt 1 ]
-    then
-        echo "usage: complete.sh <most available id list>"
-        exit 1
-fi
-
 # Compile and package the Java application.
 $SCRIPTS_FOLDER/checkoutAndPackageApp.sh $BRANCH
 
 # Get all the ids from declaration.gov.ge, and make a diff with the most available id list ($1), 
 # in order to define what are the new documents that have been posted, since the last time 
 # this script had run
-$SCRIPTS_FOLDER/defineNewIds.sh $1
+$SCRIPTS_FOLDER/defineNewIds.sh
 
 # Download the new PDFs, based on the really new ids.
 $SCRIPTS_FOLDER/downloadpdf.sh
@@ -39,8 +33,12 @@ $SCRIPTS_FOLDER/downloadpdf.sh
 $SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 
 # The XML files have been generated, we can now turn them into CSV files
-$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT
+$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "main"
+
+# This script create a CSV and XML files, which are a join of people's information with asset declaration ids.
+$SCRIPTS_FOLDER/createJoinTablesFiles.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "join"
 
 # Archiving the newly downloaded and created files
 $SCRIPTS_FOLDER/archive.sh
 
+echo "All done."

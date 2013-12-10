@@ -25,9 +25,10 @@ if ([ ! -d "$BASEDIR/archive" ]); then
     mkdir $BASEDIR/archive/output/csv/ka
 fi
 
-# Archiving the new declaration ids
+# Archiving the new declaration ids file, and also making it the new current declaration id file, to be used for the next scraping.
 now=$(date +'%Y-%m-%d')
 cp $BASEDIR/"declarationids-"$now $BASEDIR/archive/declarationids/
+mv $BASEDIR/"declarationids-"$now $BASEDIR/"currentdeclarationids"
 
 # Archiving downloaded PDF files
 echo "Archiving PDF files..."
@@ -45,6 +46,8 @@ cp -f $OUTPUT/csv/en/* $BASEDIR/archive/output/csv/en/
 cp -f $OUTPUT/csv/ka/* $BASEDIR/archive/output/csv/ka/
 cp -f $OUTPUT/xml/en/* $BASEDIR/archive/output/xml/en/
 cp -f $OUTPUT/xml/ka/* $BASEDIR/archive/output/xml/ka/
+cp -f $OUTPUT/csv/JoinResults.csv $BASEDIR/archive/output/csv/
+cp -f $OUTPUT/xml/JoinResults.xml $BASEDIR/archive/output/xml/
 
 echo "Done. The files have been archived in "$BASEDIR"/archive"
 echo "Sending report e-mail"
@@ -68,15 +71,11 @@ while read p; do
     echo "$p: $numLines line(s) added" >> emailToSend
 done < $SCRIPTS_FOLDER/listOfCsvNames.csv
 
-# Sending e-mail report
-SUBJECT="Asset Declaration Scraper report - $now"
-EMAIL="etiennebaque@gmail.com"
+# We are not sending the e-mail yet, we need a valid e-mail account for this.
 
-/usr/bin/mail -s "$SUBJECT" "$EMAIL" < emailToSend
-
+# Delete the temporary files used for counts.
 rm $BASEDIR/countBeforeUpdate
 rm $BASEDIR/countAfterUpdate
-rm emailToSend
 
-echo "e-mail sent"
+echo "Archiving done."
 

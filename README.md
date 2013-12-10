@@ -29,7 +29,7 @@ Running the scripts
 
 To run the entire process (all the 4 steps), run the following script, from the root of the project:
 
-`./scripts/complete.sh <list of declaration ids> (-noupdate)`
+`./scripts/complete.sh`
 
 where `<list of declaration ids>` is a file that contains all the declaration ids crawled from a previous run. 
 
@@ -57,13 +57,22 @@ where:
 - `<pdf folder>` is the full path where the PDF files that will be read are.
 - `<xml folder>` is the full path where the generated XML files will be written in.
 
-5) This last step will run a Java program that uses the Saxon library, in order to convert XML files into CSV files, based on XQuery manipulation.
+5) This step will run a Java program that uses the Saxon library, in order to convert XML files into CSV files, based on XQuery manipulation.
 
-`./scripts/xmltocsv.sh <xml folder> <output folder> <environment>`
+`./scripts/xmltocsv.sh <xml folder> <output folder> <environment> "main"`
 
 where:
 
 - `<xml folder>` is the full path where the XML files that will be read are.
 - `<output folder>` is the full path where the generated CSV and XML files will be written in.
 - `<environment>` can either be 'dev' or 'prod', and defines the environment your scripts are running on.
- 
+
+6) This step will run this Java program again, but this time it will create CSV and XML documents related to joined information between people's name and declaration ids.
+
+`./scripts/createJoinTables.sh <xml folder> <output folder> <environment> "join"`
+
+where:
+
+- `<xml folder>` is the full path where the XML files that will be read are.
+- `<output folder>` is the full path where the generated CSV and XML files will be written in.
+- `<environment>` can either be 'dev' or 'prod', and defines the environment your scripts are running on.

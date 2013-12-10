@@ -1,7 +1,6 @@
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.spider import BaseSpider
 from scrapy.contrib.linkextractors.sgml import SgmlLinkExtractor
-from scrapy.selector import Selector
 from scrapy.item import Item
 from scrapy.http import Request
 from declaration.items import MyItem
@@ -14,9 +13,9 @@ class DeclarationSpider(BaseSpider):
     def start_requests(self):
         f = open("idlist")
         for idurl in f.readlines():
-            url = 'https://declaration.gov.ge/eng/declaration.php?id=' + idurl.strip()
+            url = 'https://declaration.gov.ge/eng/declaration?id=' + idurl.strip()
             yield Request(url, self.parse)
-            url = 'https://declaration.gov.ge/declaration.php?id=' + idurl.strip()
+            url = 'https://declaration.gov.ge/declaration?id=' + idurl.strip()
             yield Request(url, self.parse)
         f.close()
 

@@ -12,4 +12,7 @@ logfile
 newids
 sortedidlist
 *.class
+*.pyc
+countBeforeUpdate
+countAfterUpdate
 

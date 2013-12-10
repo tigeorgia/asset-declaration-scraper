@@ -37,67 +37,86 @@ public class Main {
 	private final static String GEORGIAN_LANGUAGE = "ka";
 	private final static String ENGLISH_LANGUAGE_IN_XQUERY = "eng";
 	private final static String GEORGIAN_LANGUAGE_IN_XQUERY = "geo";
+	
 	private final static String CSV_TYPE = "csv";
 	private final static String XML_TYPE = "xml";
+	
 	private final static String AD_INFO_XML = "AssetDeclarationsQuestionsInformation.xml";
 	private final static String FUNCTIONS_XQUERY_FILE = "FunctionsForEachCSVFile.xquery";
 	private final static String MAIN_XQUERY_FILE = "RunOneQuestionOnOneAD.xquery";
 	private final static String HEADER_XQUERY_FILE = "WriteHeaders.xquery";
 	private final static String AD_XQUERY_FILE = "AssetDeclaration.xquery";
-
+	private final static String XML_UTILITIES_FILE = "XMLUtilities.xquery";
+	private final static String JOIN_TABLES_CSV_XQUERY_FILE = "JoinTableCSVFormat.xquery";
+	private final static String JOIN_TABLES_XML_XQUERY_FILE = "JoinTableXMLFormat.xquery";
+	
+	
 	private final static String CSV_NAME_XPATH_EXPR = "//q[@n=$QuestionID]/@t";
 
 	public static void main(String[] args) {
 
-		if (args != null && args.length == 5){
+		if (args != null && args.length == 6){
 
-			defineConfigurations(args);
+			Properties prop = new Properties();
+
+			String xqueryPath = args[0];
+			String environment = args[3];
+			String action = args[5];
+
+			String questionInfo = null;
+			String functionxquery = null;
+			String assetdeclaration = null;
+			String xmlUtilities = null;
+
+			try {
+				
+				// Configuring XQuery files, setting up the right values, related to the environment the program is running on.
+				prop.load(new FileInputStream(args[4]));
+
+				String xqueryScriptsPath = prop.getProperty("scraper.ad.xqueryscripts."+environment);
+				questionInfo = xqueryScriptsPath + "/" + AD_INFO_XML;
+				functionxquery = xqueryScriptsPath + "/" + FUNCTIONS_XQUERY_FILE;
+				assetdeclaration = xqueryScriptsPath + "/" + AD_XQUERY_FILE;
+				xmlUtilities = xqueryScriptsPath + "/" + XML_UTILITIES_FILE;
+
+				File mainXqueryFile = new File(xqueryPath + "/" + MAIN_XQUERY_FILE);
+				File adXqueryFile = new File(xqueryPath + "/" + AD_XQUERY_FILE);
+				File writeHeadersXqueryFile = new File(xqueryPath + "/" + HEADER_XQUERY_FILE);
+				File joinTableXmlXqueryFile = new File(xqueryPath + "/CreateJoinTables/" + JOIN_TABLES_XML_XQUERY_FILE);
+				File joinTableCsvXqueryFile = new File(xqueryPath + "/CreateJoinTables/" + JOIN_TABLES_CSV_XQUERY_FILE);
+
+				replaceSelected(mainXqueryFile, "scraper.ad.functionxquery.toreplace", functionxquery);
+				replaceSelected(adXqueryFile, "scraper.ad.questionsinfo.toreplace", questionInfo);
+				replaceSelected(writeHeadersXqueryFile, "scraper.ad.assetdeclaration.toreplace", assetdeclaration);
+				replaceSelected(joinTableXmlXqueryFile, "scraper.ad.xmlutilities.toreplace", xmlUtilities);
+				replaceSelected(joinTableCsvXqueryFile, "scraper.ad.xmlutilities.toreplace", xmlUtilities);
+
+				if (action.equalsIgnoreCase("main")){
+					// Generation of the CSV and XML files, both in English and Georgian.
+					generateCsvXmlFiles(args);
+					System.out.println("Done. The CSV files are in " + args[2]);
+				}else if (action.equalsIgnoreCase("join")){
+					// Generation of a second set of CSV and XML files, that will be a join between people's names and Asset Declaration IDs.
+					generateCsvXmlJoinFiles(args, CSV_TYPE);
+					generateCsvXmlJoinFiles(args, XML_TYPE);
+				}
+
+				// Re-initializing XQuery files to default value (ie revert the changes made previously, for the execution of generateCsvFiles())
+				replaceSelected(mainXqueryFile, functionxquery, "scraper.ad.functionxquery.toreplace");
+				replaceSelected(adXqueryFile, questionInfo, "scraper.ad.questionsinfo.toreplace");
+				replaceSelected(writeHeadersXqueryFile, assetdeclaration, "scraper.ad.assetdeclaration.toreplace");
+				replaceSelected(joinTableXmlXqueryFile, xmlUtilities, "scraper.ad.xmlutilities.toreplace");
+				replaceSelected(joinTableCsvXqueryFile, xmlUtilities, "scraper.ad.xmlutilities.toreplace");
+
+			} catch (IOException ex) {
+				ex.printStackTrace();
+			}
 
 		}else{
 			System.out.println("Error: parameters are invalid! Usage:");
-			System.out.println("java -jar declarationXmlParsing.jar <xquery file path> <input xml folder path> <output csv folder path> <environment: dev or prod> <config file path>");
+			System.out.println("java -jar declarationXmlParsing.jar <xquery file path> <input xml folder path> <output csv folder path> <environment: dev or prod> <config file path> <action: main or join>");
 		}
 
-	}
-
-	private static void defineConfigurations(String[] args) {
-
-		Properties prop = new Properties();
-
-		String xqueryPath = args[0];
-		String environment = args[3];
-
-		String questionInfo = null;
-		String functionxquery = null;
-		String assetdeclaration = null;
-
-		try {
-			prop.load(new FileInputStream(args[4]));
-
-			String xqueryScriptsPath = prop.getProperty("scraper.ad.xqueryscripts."+environment);
-			questionInfo = xqueryScriptsPath + "/" + AD_INFO_XML;
-			functionxquery = xqueryScriptsPath + "/" + FUNCTIONS_XQUERY_FILE;
-			assetdeclaration = xqueryScriptsPath + "/" + AD_XQUERY_FILE;
-
-			File mainXqueryFile = new File(xqueryPath + "/" + MAIN_XQUERY_FILE);
-			File adXqueryFile = new File(xqueryPath + "/" + AD_XQUERY_FILE);
-			File writeHeadersXqueryFile = new File(xqueryPath + "/" + HEADER_XQUERY_FILE);
-
-			replaceSelected(mainXqueryFile, "scraper.ad.functionxquery.toreplace", functionxquery);
-			replaceSelected(adXqueryFile, "scraper.ad.questionsinfo.toreplace", questionInfo);
-			replaceSelected(writeHeadersXqueryFile, "scraper.ad.assetdeclaration.toreplace", assetdeclaration);
-
-			generateCsvFiles(args);
-			System.out.println("Done. The CSV files are in " + args[2]);
-
-			// Re-initializing config files (ie revert the changes made previously, for the execution of generateCsvFiles())
-			replaceSelected(mainXqueryFile, functionxquery, "scraper.ad.functionxquery.toreplace");
-			replaceSelected(adXqueryFile, questionInfo, "scraper.ad.questionsinfo.toreplace");
-			replaceSelected(writeHeadersXqueryFile, assetdeclaration, "scraper.ad.assetdeclaration.toreplace");
-
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
 	}
 
 	/**
@@ -132,7 +151,7 @@ public class Main {
 
 	}
 
-	private static void generateCsvFiles(String[] args){
+	private static void generateCsvXmlFiles(String[] args){
 
 		String xqueryPath = args[0];
 
@@ -155,13 +174,13 @@ public class Main {
 
 				String documentName = xPath.compile(expression).evaluate(document);
 
-				// Creation of CSV files
-				generateCsvFilesPerLanguage(args, ENGLISH_LANGUAGE, documentName, questionid, CSV_TYPE);
-				generateCsvFilesPerLanguage(args, GEORGIAN_LANGUAGE, documentName, questionid, CSV_TYPE);
+				// Creation of CSV files, considering language.
+				generateCsvXmlFilesPerLanguage(args, ENGLISH_LANGUAGE, documentName, questionid, CSV_TYPE);
+				generateCsvXmlFilesPerLanguage(args, GEORGIAN_LANGUAGE, documentName, questionid, CSV_TYPE);
 
-				// Creation of XML files
-				generateCsvFilesPerLanguage(args, ENGLISH_LANGUAGE, documentName, questionid, XML_TYPE);
-				generateCsvFilesPerLanguage(args, GEORGIAN_LANGUAGE, documentName, questionid, XML_TYPE);
+				// Creation of XML files, considering language.
+				generateCsvXmlFilesPerLanguage(args, ENGLISH_LANGUAGE, documentName, questionid, XML_TYPE);
+				generateCsvXmlFilesPerLanguage(args, GEORGIAN_LANGUAGE, documentName, questionid, XML_TYPE);
 
 			}
 
@@ -181,7 +200,7 @@ public class Main {
 
 	}
 
-	private static void generateCsvFilesPerLanguage(String[] args, String lang, String documentName, String questionid, String type) {
+	private static void generateCsvXmlFilesPerLanguage(String[] args, String lang, String documentName, String questionid, String type) {
 		XQPreparedExpression expr = null;
 		XQConnection conn = null;
 		XQResultSequence xqjs = null;
@@ -286,6 +305,55 @@ public class Main {
 			System.out.println("ERROR: problem occured while writing a CSV file: " + completeFilePath);
 			e.printStackTrace();
 		} 
+	}
+	
+	private static void generateCsvXmlJoinFiles(String[] args, String type) {
+		XQPreparedExpression expr = null;
+		XQConnection conn = null;
+		XQResultSequence xqjs = null;
+		String outputFolderPath = args[2];
+		
+		String georgianXmlOutputPath = outputFolderPath + "/xml/ka";
+		String englishXmlOutputPath = outputFolderPath + "/xml/en";
+		String XQueryFile = null;
+		FileWriter result = null;
+		String xqueryPath = args[0];
+		
+		try {
+			
+			if (type.equalsIgnoreCase(CSV_TYPE)){
+				XQueryFile = xqueryPath + "/CreateJoinTables/JoinTableCSVFormat.xquery";
+				result = new FileWriter(outputFolderPath + "/csv/JoinResults.csv");
+			}else if (type.equalsIgnoreCase(XML_TYPE)){
+				XQueryFile = xqueryPath + "/CreateJoinTables/JoinTableXMLFormat.xquery";
+				result = new FileWriter(outputFolderPath + "/xml/JoinResults.xml");
+			}
+			
+			SaxonXQDataSource ds = new SaxonXQDataSource();
+			conn = ds.getConnection();
+			expr = conn.prepareExpression(new FileInputStream(XQueryFile));
+			
+			expr.bindAtomicValue(new QName("georgianXmlOutputPath"), georgianXmlOutputPath, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+			expr.bindAtomicValue(new QName("englishXmlOutputPath"), englishXmlOutputPath, conn.createAtomicType(XQItemType.XQBASETYPE_STRING));
+			
+			xqjs  = expr.executeQuery();
+			xqjs.writeSequence(result, null);
+			
+			result.flush();
+			result.close();
+			
+		} catch (XQException e) {
+			System.out.println("ERROR: problem occured while using Saxon fucntionalities! Please check your inputs.");
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			System.out.println("ERROR: The XQuery file was not found!");
+			e.printStackTrace();
+		} catch (IOException e) {
+			System.out.println("ERROR: problem occured while writing file in: " + outputFolderPath);
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	private static XQPreparedExpression getExpression(XQConnection conn, DeclarationModel model, String XQueryFile) throws FileNotFoundException, XQException{

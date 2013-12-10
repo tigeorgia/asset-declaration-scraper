@@ -51,7 +51,7 @@ fi
 # Counting the number of lines in each CSV before update.
 $SCRIPTS_FOLDER/countLinesInOutput.sh "before"
 
-java -jar ./scripts/declarationXmlParsing.jar $XQUERY_SCRIPTS_FOLDER $XML_OUTPUT $OUTPUT $ENVIRONMENT $SCRIPTS_FOLDER/config.properties
+java -jar ./scripts/declarationXmlParsing.jar $XQUERY_SCRIPTS_FOLDER $XML_OUTPUT $OUTPUT $ENVIRONMENT $SCRIPTS_FOLDER/config.properties "main"
 
 $SCRIPTS_FOLDER/countLinesInOutput.sh "after"
 
