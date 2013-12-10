@@ -1,29 +1,55 @@
 module namespace tiUtil= "http://transparency.ge/XML-Utilities";
 
+declare namespace xsd="http://www.w3.org/2001/XMLSchema";
 
 (: helper functions :)
 
 declare function tiUtil:NotEmpty($s){ if ($s) then $s else ' '};
 declare function tiUtil:tostring($list){normalize-space(string-join( for $t in $list return normalize-space(string($t)),' '))};
 declare function tiUtil:NoDoubleQuotes($text){replace($text,'"',"'")};
+
+
+
+(: date functions :)
 declare function tiUtil:toISOdate($date){ let $cleandate:= replace($date,'[^0-9/.\-]','')   (: remove junk including space :)
                                           let $cleandate := replace($cleandate,'(\d*)[/.\-](\d*)[/.\-](\d*)','$3-$2-$1')  (: reorder :) 
                                           let $cleandate := replace($cleandate,'-(\d)-','-0$1-')  (: pad the month :)
                                           let $cleandate := replace($cleandate,'-(\d)$','-0$1')   (: pad the day :)
                                           return $cleandate};
+ 
+ (: compute the number of days (as a positive integer) between $Earlier and $Later which are both iso-dates :)
+declare function tiUtil:SubstractDates($Earlier,$Later){days-from-duration(xsd:date($Later) - xsd:date($Earlier))};
+          
+                                          
 declare function tiUtil:toAmountWithMoneyUnit($money){
     let $amount :=  replace($money,'[^0-9.]','') (: tiUtil:NotEmpty(replace($money,'[^0-9.]','')) :)
     let $Unit := replace($money,'[0-9 .\-]','')   (: tiUtil:NotEmpty(replace($money,'[0-9.]','')) :)
         return (tiUtil:pad($amount),tiUtil:pad($Unit))};
 
+
+(: Functions about names :) 
+
 (: create 2 columns first-name;last-name out of a string :)
 declare function tiUtil:ParseStringToFirstNameLastName($name){
+let $name := replace($name,'\(.*\)',' ')  (: get rid of the "extra names between brackets" :)
 let $fnln := tokenize(normalize-space($name),' +')  
 return 
 if (count($fnln)=2)  (: just a first name and a last name :)
     then $fnln 
     else (tiUtil:pad(tiUtil:tostring($fnln[not(last())])),tiUtil:pad($fnln[last()]))  (: otherwise we use the last item as the last name, and all the rest as the first name :)
     };                           
+
+
+(: returns True if $Firstname1 and 2 are the same, or if one of them ends in an "i" and the other not, and they are the same without the "i" :)
+declare function tiUtil:EqualFirstnames($Firstname1,$Firstname2){
+$Firstname1 eq $Firstname2
+or
+replace($Firstname1,'ი$','') eq $Firstname2
+or
+replace($Firstname2,'ი$','') eq $Firstname1
+};
+
+
 
 (: Creating CSV file functions :)
 
@@ -76,7 +102,17 @@ declare function  tiUtil:WriteAttributeValueAsTRwithAttributes($seq)
 
 
 (: write a table to CSV format :)
-declare function tiUtil:trTOcsv($table){for $tr in $table//tr return concat('&#10;',string-join($tr//td/(.|@*)[not(empty(.))],'&#09;'))};
+declare function tiUtil:trTOcsv($table){for $tr in $table//tr return 
+                            concat('&#10;',
+                                   string-join(for $i in $tr//td  return 
+                                                                   if ($i eq '') (: value is in an attribute :)
+                                                                   then $i/@*
+                                                                   else $i
+                                              ,
+                                              '&#09;'
+                                              )
+                                   )
+                                        };
 
 
 (: write a table in which each td has an id element with a name to JSON format
@@ -128,3 +164,14 @@ declare function tiUtil:GiveUniqueID($firstName,$lastName,$BirthDate)
 
 declare function tiUtil:PersonID2Name($PersonID){
 codepoints-to-string(for $i in tokenize($PersonID,'\.') return xs:integer($i))};
+
+
+
+(: functions about Asset Declarations  
+$ADheaderRows should be bound to a sequnece of tr elements from the ADheader file :)
+
+declare function tiUtil:AssetDeclarations($FirstName,$LastName,$ADheaderRows){
+for $tr in $ADheaderRows[ .//td[2]  eq $LastName and   tiUtil:EqualFirstnames(.//td[1],$FirstName) ]
+    order by $tr//td[last()-1]  descending  (: date of submission :) 
+    return $tr
+};
