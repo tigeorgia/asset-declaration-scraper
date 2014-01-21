@@ -20,7 +20,25 @@ declare function tiUtil:toISOdate($date){ let $cleandate:= replace($date,'[^0-9/
  (: compute the number of days (as a positive integer) between $Earlier and $Later which are both iso-dates :)
 declare function tiUtil:SubstractDates($Earlier,$Later){days-from-duration(xsd:date($Later) - xsd:date($Earlier))};
           
-                                          
+          
+ (: compute the age in years TODAY given a date of birth:)
+ declare function tiUtil:AgeTODAYInYears($dob) {tiUtil:AgeInYears($dob,current-date())};
+(: compute the age in years given two dates. from Michael Kay http://www.stylusstudio.com/xsllist/200601/post60440.html 
+returns 666 when one of the dates is not an ISO date
+:)
+declare function tiUtil:AgeInYears($Earlier,$Later){
+if ( $Earlier castable as  xs:date  and $Later castable as  xs:date)
+then
+years-from-duration(
+((xsd:date($Later) - xsd:date($Earlier)) div xsd:dayTimeDuration('P1D'))
+   idiv 365.242199 
+   * xsd:yearMonthDuration('P1Y')
+   )
+ else
+ 666
+ };
+
+
 declare function tiUtil:toAmountWithMoneyUnit($money){
     let $amount :=  replace($money,'[^0-9.]','') (: tiUtil:NotEmpty(replace($money,'[^0-9.]','')) :)
     let $Unit := replace($money,'[0-9 .\-]','')   (: tiUtil:NotEmpty(replace($money,'[0-9.]','')) :)
@@ -49,7 +67,41 @@ or
 replace($Firstname2,'ი$','') eq $Firstname1
 };
 
+(: determine the Gender based on a Georgian first name :)
 
+declare function tiUtil:Gender($name as xs:string){
+    let $genderdb := doc('GenderData.xml')
+    return
+        $genderdb//tr[.//td[3] eq $name]//td[2] };  
+
+(: the same as the previous, but now for Latin alphabet version of the name :)
+declare function tiUtil:GenderForLatinName($name as xs:string){
+    let $genderdb := doc('GenderData.xml')
+    return
+        $genderdb//tr[.//td[4] eq $name]//td[2] };  
+
+(: Give the English variant of a Georgian name used in the same asset declaration :)
+declare function tiUtil:GeorgianName2EnglishName($fn,$ln,$id,$geo_col,$eng_col){
+let $ADheadername := $geo_col[.//@name="ADheader"]//tr[./td[1] = $fn and ./td[2] = $ln and ./td[last()]=$id]
+let $ADfamilyname := for $name at $pos in $geo_col[.//@name="ADfamily_relations"]//tr[./td[last()]=$id]
+                     where $name/td[1] = $fn and $name/td[2] = $ln
+                     return   $eng_col[  .//@name="ADfamily_relations"]//tr[./td[last()]=$id][$pos]
+return
+    if ($ADheadername) (: there is oonly one line for each asset declaration :)
+    then $eng_col[.//@name="ADheader"]//tr[  ./td[last()]=$id]  
+    else $ADfamilyname  (: here we have to use the position of the family members. We assume they are ordered in the same way in English and in Georgian :)
+ 
+    };
+
+
+
+(: find the relatives in a collection given an Asset declaration ID :)
+
+declare function tiUtil:relatives($ADid,$col){
+let $ADrelatives := $col[.//@name="ADfamily_relations"]//tr
+return 
+$ADrelatives[td[last()]=$ADid]
+};
 
 (: Creating CSV file functions :)
 
