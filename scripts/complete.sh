@@ -41,7 +41,4 @@ $SCRIPTS_FOLDER/createJoinTablesFiles.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "join"
 # Archiving the newly downloaded and created files
 $SCRIPTS_FOLDER/archive.sh
 
-# Exporting the MP incomes into an SQL file
-$SCRIPTS_FOLDER/MPincome.sh
-
 echo "All done."

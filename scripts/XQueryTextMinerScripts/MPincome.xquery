@@ -13,7 +13,8 @@ GEORGIAN VERSION
 declare namespace ti = "http://transparency.ge";
 declare namespace xsd="http://www.w3.org/2001/XMLSchema";
 
-import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "/home/etienne/asset-declaration-scraper/scripts/XQueryTextMinerScripts/XMLUtilities.xquery";
+(: import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "/home/etienne/asset-declaration-scraper/scripts/XQueryTextMinerScripts/XMLUtilities.xquery"; :)
+import module namespace tiUtil= "http://transparency.ge/XML-Utilities" at "/mnt/drvScrapper/asset-declaration-scraper/scripts/XQueryTextMinerScripts/XMLUtilities.xquery";
 
 
 declare option saxon:output "method=text";  (: output as text without xml header :)
