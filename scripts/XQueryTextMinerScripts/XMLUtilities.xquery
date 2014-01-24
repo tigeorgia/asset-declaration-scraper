@@ -4,7 +4,7 @@ declare namespace xsd="http://www.w3.org/2001/XMLSchema";
 
 
 
-declare variable  $tiUtil:genderdb := doc('GenderData.xml');
+declare variable  $tiUtil:genderdb := doc('https://raw2.github.com/tigeorgia/asset-declaration-scraper/master/scripts/XQueryTextMinerScripts/GenderData.xml');
 (: helper functions :)
 
 declare function tiUtil:NotEmpty($s){ if ($s) then $s else ' '};
