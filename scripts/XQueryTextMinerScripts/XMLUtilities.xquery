@@ -7,7 +7,7 @@ declare namespace xsd="http://www.w3.org/2001/XMLSchema";
 declare function tiUtil:NotEmpty($s){ if ($s) then $s else ' '};
 declare function tiUtil:tostring($list){normalize-space(string-join( for $t in $list return normalize-space(string($t)),' '))};
 declare function tiUtil:NoDoubleQuotes($text){replace($text,'"',"'")};
-
+declare function tiUtil:QuotesAround($text){concat('"',tiUtil:NoDoubleQuotes($text),'"')};
 
 
 (: date functions :)
