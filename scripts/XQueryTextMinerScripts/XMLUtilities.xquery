@@ -2,6 +2,9 @@ module namespace tiUtil= "http://transparency.ge/XML-Utilities";
 
 declare namespace xsd="http://www.w3.org/2001/XMLSchema";
 
+
+
+declare variable  $tiUtil:genderdb := doc('GenderData.xml');
 (: helper functions :)
 
 declare function tiUtil:NotEmpty($s){ if ($s) then $s else ' '};
@@ -70,15 +73,15 @@ replace($Firstname2,'ი$','') eq $Firstname1
 (: determine the Gender based on a Georgian first name :)
 
 declare function tiUtil:Gender($name as xs:string){
-    let $genderdb := doc('GenderData.xml')
+    
     return
-        $genderdb//tr[.//td[3] eq $name]//td[2] };  
+        $tiUtil:genderdb//tr[.//td[3] eq $name]//td[2] };  
 
 (: the same as the previous, but now for Latin alphabet version of the name :)
 declare function tiUtil:GenderForLatinName($name as xs:string){
-    let $genderdb := doc('GenderData.xml')
+    
     return
-        $genderdb//tr[.//td[4] eq $name]//td[2] };  
+        $tiUtil:genderdb//tr[.//td[4] eq $name]//td[2] };  
 
 (: Give the English variant of a Georgian name used in the same asset declaration :)
 declare function tiUtil:GeorgianName2EnglishName($fn,$ln,$id,$geo_col,$eng_col){
