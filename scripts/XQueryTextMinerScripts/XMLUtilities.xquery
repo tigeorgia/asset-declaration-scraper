@@ -10,8 +10,9 @@ declare variable  $tiUtil:genderdb := doc('https://raw2.github.com/tigeorgia/ass
 declare function tiUtil:NotEmpty($s){ if ($s) then $s else ' '};
 declare function tiUtil:tostring($list){normalize-space(string-join( for $t in $list return normalize-space(string($t)),' '))};
 declare function tiUtil:NoDoubleQuotes($text){replace($text,'"',"'")};
+declare function tiUtil:NoSingleQuotes($text){replace($text,"'",'"')};
 declare function tiUtil:QuotesAround($text){concat('"',tiUtil:NoDoubleQuotes($text),'"')};
-
+declare function tiUtil:SingleQuotesAround($text){concat("'",tiUtil:NoSingleQuotes($text),"'")};
 
 (: date functions :)
 declare function tiUtil:toISOdate($date){ let $cleandate:= replace($date,'[^0-9/.\-]','')   (: remove junk including space :)
