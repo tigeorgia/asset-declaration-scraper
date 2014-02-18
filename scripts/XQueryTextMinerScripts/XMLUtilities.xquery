@@ -13,6 +13,16 @@ declare function tiUtil:NoDoubleQuotes($text){replace($text,'"',"'")};
 declare function tiUtil:NoSingleQuotes($text){replace($text,"'",'"')};
 declare function tiUtil:QuotesAround($text){concat('"',tiUtil:NoDoubleQuotes($text),'"')};
 declare function tiUtil:SingleQuotesAround($text){concat("'",tiUtil:NoSingleQuotes($text),"'")};
+(: declare function tiUtil:SingleQuotedAndGeorgianAssetDeclaration($text){
+			let $textToReturn :=  if contains($text,'Asset Declaration') then return concat("'",tiUtil:NoSingleQuotes(replace($text,'Asset Declaration','ქონებრივი დეკლარაცია')),"'") else return concat("'",tiUtil:NoSingleQuotes($text),"'")
+			return $textToReturn}; :)
+declare function tiUtil:SingleQuotedAndGeorgianAssetDeclaration($text){
+if (contains($text,'Asset Declaration')) 
+then 
+concat("'",tiUtil:NoSingleQuotes(replace($text,'Asset Declaration','ქონებრივი დეკლარაცია')),"'") 
+else 
+concat("'",tiUtil:NoSingleQuotes($text),"'")
+}; 
 
 (: date functions :)
 declare function tiUtil:toISOdate($date){ let $cleandate:= replace($date,'[^0-9/.\-]','')   (: remove junk including space :)
@@ -53,12 +63,11 @@ declare function tiUtil:toAmountWithMoneyUnit($money){
 
 (: create 2 columns first-name;last-name out of a string :)
 declare function tiUtil:ParseStringToFirstNameLastName($name){
-let $name := replace($name,'\(.*\)',' ')  (: get rid of the "extra names between brackets" :)
 let $fnln := tokenize(normalize-space($name),' +')  
 return 
 if (count($fnln)=2)  (: just a first name and a last name :)
     then $fnln 
-    else (tiUtil:pad(tiUtil:tostring($fnln[not(last())])),tiUtil:pad($fnln[last()]))  (: otherwise we use the last item as the last name, and all the rest as the first name :)
+    else (concat($fnln[1],' ',$fnln[2]),tiUtil:pad($fnln[3]))  (: otherwise we use the last item as the last name, and all the rest as the first name :)
     };                           
 
 
