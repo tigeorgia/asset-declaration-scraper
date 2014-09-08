@@ -28,8 +28,9 @@ require 'nokogiri'
 require 'mysql2'
 require 'yaml'
 
-en_xml_folder = '/'
-db_config_path = '/'
+en_xml_folder = '/home/etienne/workspace/test/asset-declaration-scraper/xmls/en/'
+ka_xml_folder = '/home/etienne/workspace/test/asset-declaration-scraper/xmls/ka/'
+db_config_path = '/home/etienne/workspace/test/asset-declaration-scraper/database.yml'
 
 # method used to extract data on the expenses page, and property assets page
 def extract_several_lines(doc, page_number, full_name)
@@ -38,8 +39,8 @@ def extract_several_lines(doc, page_number, full_name)
     i = 0
     for i in 0..page.length-1
 	if page[i].children.text == full_name
-	    left_index = page[i].attributes["left"].value 
-	    new_left_index = line_index
+	    line_index = page[i].attributes["left"].value 
+	    new_line_index = line_index
 	    i += 1
 	    info = ''
 	    while new_line_index.to_i < line_index.to_i
@@ -53,6 +54,26 @@ def extract_several_lines(doc, page_number, full_name)
 	i += 1
     end
     return array
+end
+
+def define_next_index(i,page,col_index,max_index)
+    result = 0
+    if page[i+1]
+	line_index = page[i].attributes["left"].value.to_i
+	next_line_index = page[i+1].attributes["left"].value.to_i
+        if next_line_index - line_index > 180
+	    if col_index == max_index
+	        result = 0
+	    else
+	        result = col_index + 1
+	    end
+	elsif line_index - next_line_index > 0
+	    result = 0
+        else
+	    result = col_index
+        end
+    end
+    return result 
 end
 
 # create connection to MySql database
@@ -70,13 +91,15 @@ end
 Dir.foreach(en_xml_folder) do |item|
     next if item == '.' or item == '..'
  
+    puts item
+
     # we open the English XML file
-    f = File.open(item)
+    f = File.open(en_xml_folder+item)
     doc = Nokogiri::XML(f)
 
     # we also open the Georgian XML file
-    f_ka = File.open("../ka/#{item}")
-    doc_ka = nokogiri::XML(f_ka)
+    f_ka = File.open(ka_xml_folder+item)
+    doc_ka = Nokogiri::XML(f_ka)
 
     # Initialization of main variables
     full_name = ''
@@ -105,22 +128,33 @@ Dir.foreach(en_xml_folder) do |item|
     
     if !is_already_in_db
 
+	# Extracting the Georgian name
+        first_page_ka = doc_ka.xpath('//page[@number="1"]/text')
+        if first_page_ka[3].children.text.include? 'სახელი, გვარი:'
+    	    full_name_ka = first_page_ka[4].children.text
+        else
+            # If we didn't find the name where it was supposed to be, we have to go through every line of the xml file, until we find it.
+        end
+
         # Extract the family status
         family_status_en = ''
         family_status_ka = ''
 	family_member_income = {} # list of keys for this hash: fam_name_en, fam_name_ka, fam_organisation fam_role_en, fam_role_ka, fam_gender, fam_date_of_birth, fam_income, fam_cars
-	family_info = [] 
+	family_info = []
+	all_family_info = []
         is_married = false
         i = 0
 	for i in 0..first_page.length-1
 	    if first_page[i].children.text == "Place of Birth, Date of Birth: "
+		family_member_income['full_name_en'] = full_name
+		family_member_income['full_name_ka'] = full_name_ka
 		place_dob_array = first_page[i+1].children.text.split(', ')
 	        if place_dob_array.length == 2
 		    family_member_income['place_of_birth'] = place_dob_array[0]
 		    family_member_income['date_of_birth'] = place_dob_array[1]
-		elsif place_dob_array.length == 3
-		    family_member_income['place_of_birth'] = "#{place_dob_array[0]}, #{place_dob_array[1]}"
-		    family_member_income['date_of_birth'] = place_dob_array[2]
+		elsif place_dob_array.length > 2
+		    family_member_income['place_of_birth'] = "#{place_dob_array[0..place_dob_array.length-2].join(', ')}"
+		    family_member_income['date_of_birth'] = place_dob_array[place_dob_array.length-1]
 		end
 		family_member_income['role_en'] = '' # No role (relationship) assigned when we're dealing with MP
 		family_member_income['role_ka'] = ''
@@ -130,62 +164,115 @@ Dir.foreach(en_xml_folder) do |item|
 
 	    if first_page[i].children.text == "Relationship"
 		# The next line will be the first relative. And we'll have relative information until we see the data 'www.declaration.gov.ge'
-		family_member_income = {}
 		i += 1
+		col_index = 0
+		first_name = []
+		last_name = []
+		pob = []
+		dob = []
+		role = []
+		family_member_income = {}
 		while first_page[i].children.text != 'www.declaration.gov.ge'
-		    first_name = first_page[i].children.text
-		    i += 1
-		    last_name = first_page[i].children.text
-		    i += 1
-		    family_member_income['full_name_en'] = "#{first_name} #{last_name}"
-		    family_member_income['place_of_birth_en'] = first_page[i].children.text
-		    i += 1
-		    family_member_income['date_of_birth'] = first_page[i].children.text
-		    i += 1
-		    family_member_income['role_en'] = first_page[i].children.text
-		    if family_member_income['role_en'] == "Spouse"
-			is_married = true
+		    if col_index == 0
+			family_member_income = {}
+			first_name = []
+			last_name = []
+			pob = []
+			dob = []
+			role = []
+			first_name << first_page[i].children.text
+		    elsif col_index == 1
+			last_name << first_page[i].children.text			
+		    elsif col_index == 2
+			pob << first_page[i].children.text
+		    elsif col_index == 3
+			dob << first_page[i].children.text
+		    else
+			role << first_page[i].children.text
+
+			family_member_income['full_name_en'] = "#{first_name.join(' ')} #{last_name.join(' ')}"
+		    	family_member_income['place_of_birth_en'] = pob.join(' ')
+		    	family_member_income['date_of_birth'] = dob.join(' ')
+			family_member_income['role_en'] = role.join(' ')
+			if family_member_income['role_en'] == "Spouse"
+			    is_married = true
+			end
+			family_info << family_member_income
 		    end
+
+		    col_index = define_next_index(i,first_page,col_index,4)
 		    i += 1
-		    family_info << family_member_income
 		end
 	    end
 	    i += 1
 	end
 
-	# Extracting the Georgian name
-        first_page_ka = doc.xpath('//page[@number="1"]/text')
-        if first_page_ka[3].children.text.include? 'სახელი, გვარი:'
-    	    full_name_ka = first_page[4].children.text
-        else
-            # If we didn't find the name where it was supposed to be, we have to go through every line of the xml file, until we find it.
-        end
 	for i in 0..first_page_ka.length-1
+	    relative_index = 0
+
+	    if first_page_ka[i].children.text == "დაბადების ადგილი, დაბადების თარიღი: "
+		place_dob_array = first_page_ka[i+1].children.text.split(', ')
+		all_info = {}
+	        if place_dob_array.length == 2
+		    all_info['place_of_birth_ka'] = place_dob_array[0]
+		elsif place_dob_array.length > 2
+		    all_info['place_of_birth_ka'] = "#{place_dob_array[0..place_dob_array.length-2].join(', ')}"	
+		end
+
+		all_info = family_info[relative_index].merge(all_info)
+		all_family_info << all_info
+
+	    end
+
 	    if first_page_ka[i].children.text == "კავშირი"
 		# The next line will be the first relative, this time in Georgian. And like before, we'll have relative information until we see the data 'www.declaration.gov.ge'
 		i += 1
+		first_name = []
+		last_name = []
+		pob = []
+		dob = []
+		role = []
+		col_index = 0
 		relative_index = 1
-		while first_page[i].children.text != 'www.declaration.gov.ge'
-		    first_name = first_page[i].children.text
+		while i < first_page_ka.length && first_page_ka[i].children.text != 'www.declaration.gov.ge' && relative_index < family_info.length
+		    if col_index == 0
+			first_name = []
+			last_name = []
+			pob = []
+			dob = []
+			role = []
+			family_member_income = {}
+			first_name << first_page_ka[i].children.text
+		    elsif col_index == 1
+			last_name << first_page_ka[i].children.text			
+		    elsif col_index == 2
+			pob << first_page_ka[i].children.text
+		    elsif col_index == 3
+			#dob << first_page[i].children.text
+		    else
+			role << first_page_ka[i].children.text
+			all_info = {}
+			all_info['full_name_ka'] = "#{first_name.join(' ')} #{last_name.join(' ')}"
+		    	all_info['place_of_birth_ka'] = pob.join(' ')
+			all_info['role_ka'] = role.join(' ')
+
+			all_info = family_info[relative_index].merge(all_info)
+			all_family_info << all_info
+			relative_index += 1
+		    end
+		
+		    col_index = define_next_index(i,first_page_ka,col_index,4)
 		    i += 1
-		    last_name = first_page[i].children.text
-		    i += 1
-		    family_info[relative_index]['full_name_ka'] = "#{first_name} #{last_name}"
-		    family_info[relative_index]['place_of_birth_ka'] = first_page[i].children.text
-		    i += 1
-		    #family_member_income['date_of_birth'] = first_page[i].children.text
-		    i += 1
-		    family_info[relative_index]['role_ka'] = first_page[i].children.text
-		    i += 1
-		    relative_index += 1
 		end
 	    end
 	    i += 1
 	end
 
+	puts all_family_info
 
-	insert_query = "INSERT INTO representative_declaration (ad_id, name_ka) VALUES (#{declaration_id},#{full_name_ka});"
-        mysql.query(query)
+
+	insert_query = "INSERT INTO representative_declaration (ad_id, name_ka) VALUES (#{declaration_id},'#{full_name_ka}');"
+        mysql.query(insert_query)
 
         if is_married
 	    family_status_en = "Married"
@@ -197,20 +284,40 @@ Dir.foreach(en_xml_folder) do |item|
 
 	family_income_array = []
 
-	# Extracting MP personal info + family members personal info
-	personal_info = doc.xpath('')
-
-        # Extracting main salary, and family income
+        # Extracting main salary, and family income. 
+	# This information can be found on page 8 or 9.
         salary_page = doc.xpath('//page[@number="8"]/text')
+	right_info_found = false
+        for i in 0..salary_page.length-1
+	    if salary_page[i].children.text.include? 'Have you or your family members undertaken any type of paid work in Georgia or abroad,'
+		right_info_found = true
+		break	    
+	    end
+	end
+	if !right_info_found
+	    salary_page = doc.xpath('//page[@number="9"]/text')
+	end
+
         main_salary = 0.0
         i = 0
 	col_index = 0
         family_income = {}	
 	current_name = ''
-        for i in 0..salary_page.length-1
+	people_index_found = false
+	people_index = 0
+	while !people_index_found
+	    if salary_page[people_index].children.text.include? 'December)'
+		people_index_found = true
+		people_index += 1
+		break
+	    else
+		people_index += 1
+	    end
+	end
+        for i in people_index..salary_page.length-1
 	    if col_index == 0 # "Name" column
-		current_name = salary_page[i].children.text
-		if !family_income.hasKey?(current_name)
+		current_name = salary_page[i].children.text.rstrip
+		if !family_income.has_key?(current_name)
 		    family_income[current_name] = 0.0
 		end
 	    elsif col_index == 1 # "Organisation" column
@@ -220,6 +327,7 @@ Dir.foreach(en_xml_folder) do |item|
 	    else # "Income received" column
 		family_income[current_name] = salary_page[i].children.text.to_f
 	    end
+	    col_index = define_next_index(i,salary_page,col_index,3)
 	end
 
         for i in 0..salary_page.length-1
@@ -241,7 +349,7 @@ Dir.foreach(en_xml_folder) do |item|
 		car_info = ''
 		car_name_owner_en = car_page[i-1].children.text
 		i += 1
-		while page[i].attributes["left"].value > page[i-1].attributes["left"].value # while we are on the same line
+		while car_page[i].attributes["left"].value > car_page[i-1].attributes["left"].value # while we are on the same line
 		    car_info += "#{car_page[i].children.text} "
 		    i += 1
 		end
@@ -250,7 +358,18 @@ Dir.foreach(en_xml_folder) do |item|
 	end
     
         # Extracting entrepreneurial salary
+	# This information can be found on page 7 or 8.
         salary_page = doc.xpath('//page[@number="7"]/text')
+	right_info_found = false
+        for i in 0..salary_page.length-1
+	    if salary_page[i].children.text.include? 'Have you or your family members undertaken any type of entrepreneurial activity?,'
+		right_info_found = true
+		break	    
+	    end
+	end
+	if !right_info_found
+	    salary_page = doc.xpath('//page[@number="8"]/text')
+	end
         entr_salary = 0.0
         i = 0
         for i in 0..salary_page.length-1
@@ -276,26 +395,37 @@ Dir.foreach(en_xml_folder) do |item|
         
         insert_query = "INSERT INTO representative_representative (submission_date, name_ka, entrepreneurial_salary, main_salary, declaration_id, family_status_en, \
 	  	    family_status_ka, expenses_en, expenses_ka, property_assets_en, property_assets_ka) VALUES\
-		    (TO_DATE(#{submission_date},'DD/MM/YYYY'),'#{full_name_ka}', #{entr_salary}, #{main_salary}, #{declaration_id}, '#{family_status_en}', \
+		    (STR_TO_DATE(#{submission_date},'%d/%m/%Y'),'#{full_name_ka}', #{entr_salary}, #{main_salary}, #{declaration_id}, '#{family_status_en}', \
 		    '#{family_status_ka}', '#{en_expenses_array.join('; ')}', '#{ka_expenses_array.join('; ')}', '#{en_property_asset_array.join('; ')}', '#{ka_property_asset_array.join('; ')}');"
-	mysql.query(query)
+	mysql.query(insert_query)
+
 
 	# Extracting now information about family members assets
-
 	family_income.each do |key, value| # key is full english name, value is this person's income
 	    i = 0
-	    family_info.each do |member|
+	    found_member = false
+	    all_family_info.each do |member|
 		if member['full_name_en'] == key
+		    found_member = true
 		    break;
 		else
 		    i += 1
 		end
 	    end
-	    insert_query = "INSERT INTO representative_family_income (ad_id,submission_date,fam_name_en,fam_name_ka,fam_role_en,fam_role_ka,fam_gender, \
+
+	    if found_member	    
+		car_value = ''
+	        if car_info_hash.has_key?(key)
+		    car_value = car_info_hash[key]
+	        else
+		    car_value = ''
+	        end
+	        insert_query = "INSERT INTO representative_family_income (ad_id,submission_date,fam_name_en,fam_name_ka,fam_role_en,fam_role_ka,fam_gender, \
 			    fam_date_of_birth,fam_income,fam_cars) VALUES \
-			    (#{declaration_id},TO_DATE(#{submission_date},'DD/MM/YYYY'),'#{family_info[i]['full_name_en']}','#{family_info[i]['full_name_ka']}','#{family_info[i]['role_en']}','#{family_info[i]['role_ka']}','',\
-			    TO_DATE(#{family_info[i]['date_of_birth']},'DD/MM/YYYY'),#{family_income[key]},#{car_info_hash[key]});"
-	    mysql.query(query)
+			    (#{declaration_id},STR_TO_DATE(#{submission_date},'%d/%m/%Y'),'#{all_family_info[i]['full_name_en']}','#{all_family_info[i]['full_name_ka']}','#{all_family_info[i]['role_en']}','#{all_family_info[i]['role_ka']}','',\
+			    STR_TO_DATE(#{all_family_info[i]['date_of_birth']},'%d/%m/%Y'),#{family_income[key]},'#{car_value}');"
+	        mysql.query(insert_query)
+	    end
 	end
 
     end
@@ -303,8 +433,8 @@ Dir.foreach(en_xml_folder) do |item|
     f.close
     f_ka.close
 
-    puts "All done."
-
 end
+
+puts "All done."
 
 
