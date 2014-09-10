@@ -28,46 +28,29 @@ require 'nokogiri'
 require 'mysql2'
 require 'yaml'
 
-en_xml_folder = '/home/etienne/workspace/test/asset-declaration-scraper/xmls/en/'
-ka_xml_folder = '/home/etienne/workspace/test/asset-declaration-scraper/xmls/ka/'
+en_xml_folder = '/home/etienne/workspace/test/xmloutput/en/'
+ka_xml_folder = '/home/etienne/workspace/test/xmloutput/ka/'
 db_config_path = '/home/etienne/workspace/test/asset-declaration-scraper/database.yml'
 
-# method used to extract data on the expenses page, and property assets page
-def extract_several_lines(doc, page_number, full_name)
-    array = []
-    page = doc.xpath("//page[@number='#{page_number}']/text")
-    i = 0
-    for i in 0..page.length-1
-	if page[i].children.text == full_name
-	    line_index = page[i].attributes["left"].value 
-	    new_line_index = line_index
-	    i += 1
-	    info = ''
-	    while new_line_index.to_i < line_index.to_i
-		info += "${page[i].children.text} - "
-		i += 1
-		new_line_index = page[i].attributes["left"].value
-	    end
-	    info = info[0..info.length-3]
-	    array << info
-	end
-	i += 1
-    end
-    return array
-end
 
+#########################################
+#
+# This function defines if the next index of a page goes to another table column
+# or if it stays in the same table column.
+#
+#########################################
 def define_next_index(i,page,col_index,max_index)
     result = 0
     if page[i+1]
 	line_index = page[i].attributes["left"].value.to_i
 	next_line_index = page[i+1].attributes["left"].value.to_i
-        if next_line_index - line_index > 180
-	    if col_index == max_index
+        if next_line_index - line_index > 150
+	    if col_index > max_index
 	        result = 0
 	    else
 	        result = col_index + 1
 	    end
-	elsif line_index - next_line_index > 0
+	elsif line_index - next_line_index > 400
 	    result = 0
         else
 	    result = col_index
@@ -76,22 +59,79 @@ def define_next_index(i,page,col_index,max_index)
     return result 
 end
 
-# create connection to MySql database
-db_config = YAML.load_file(db_config_path)
-mysql = Mysql2::Client.new(:host => db_config["host"], :port => db_config["port"], :database => db_config["database"], :username => db_config["username"], 
-			   :password => db_config["password"], :encoding => db_config["encoding"], :reconnect => db_config["reconnect"])
 
-# First, make sure the config file exist
+#########################################
+#
+# This function checks whether or not we're on the right page,
+# as some specific page can have different page number,
+# between 2 documents.
+#
+#########################################
+def is_it_the_right_page(page,message)
+    right_info_found = false
+    for i in 0..page.length-1
+	if page[i].children.text.include? message
+	    right_info_found = true
+	    break	    
+	end
+    end
+    return right_info_found
+end
+
+
+#########################################
+#
+# This function scrapes information on the expenses page, 
+# and on the property assets page.
+#
+#########################################
+def get_property_expenses_info(message,previous_message,property_page,full_name)
+    i = 0
+    property_array = []
+    for i in 1..property_page.length-1
+	if (property_page[i].children.text.include? message) && (property_page[i-1].children.text.include? previous_message)
+	    # The next line will be the first relative. And we'll have relative information until we see the data 'www.declaration.gov.ge'
+	    i += 1
+	    col_index = 0
+	    is_main_person = false
+	    while i <= property_page.length-1 && property_page[i].children.text != 'www.declaration.gov.ge'
+	    	if col_index == 0
+		    is_main_person = property_page[i].children.text == full_name
+	    	elsif col_index == 2
+		    if is_main_person
+		        property_array << property_page[i].children.text.gsub('\'','')
+		    end
+	    	end
+	        col_index = define_next_index(i,property_page,col_index,3)
+	        i += 1
+	    end
+        end
+        i += 1
+    end
+    return property_array
+end
+
+# Program starts here
+
+# First, make sure the config file exists
 if !File.exists?(db_config_path)
   log.error "The #{db_config_path} (config file) does not exist"
   exit
 end
 
-# We loop through all the XML declarations
+# Create connection to MySql database
+db_config = YAML.load_file(db_config_path)
+mysql = Mysql2::Client.new(:host => db_config["host"], :port => db_config["port"], :database => db_config["database"], :username => db_config["username"], 
+			   :password => db_config["password"], :encoding => db_config["encoding"], :reconnect => db_config["reconnect"])
+
+
+# We loop through all the XML declarations files.
+index_folder = 1.00
+total_number = Dir[File.join(en_xml_folder, '**', '*')].count{ |file| File.file?(file) }
 Dir.foreach(en_xml_folder) do |item|
     next if item == '.' or item == '..'
- 
-    puts item
+    
+    puts "#{item}   \t\t(#{((index_folder / total_number.to_f) * 100).round(2)} % done)"
 
     # we open the English XML file
     f = File.open(en_xml_folder+item)
@@ -128,6 +168,8 @@ Dir.foreach(en_xml_folder) do |item|
     
     if !is_already_in_db
 
+	# We're extracting all the necessary information, as this declaration was never inserted in the database.
+
 	# Extracting the Georgian name
         first_page_ka = doc_ka.xpath('//page[@number="1"]/text')
         if first_page_ka[3].children.text.include? 'სახელი, გვარი:'
@@ -145,7 +187,9 @@ Dir.foreach(en_xml_folder) do |item|
         is_married = false
         i = 0
 	for i in 0..first_page.length-1
+	    
 	    if first_page[i].children.text == "Place of Birth, Date of Birth: "
+		# We first get information about the MP.
 		family_member_income['full_name_en'] = full_name
 		family_member_income['full_name_ka'] = full_name_ka
 		place_dob_array = first_page[i+1].children.text.split(', ')
@@ -162,6 +206,7 @@ Dir.foreach(en_xml_folder) do |item|
 		family_info << family_member_income
 	    end
 
+	    # We get here inforamtion about the relatives (available on the declaration first page)
 	    if first_page[i].children.text == "Relationship"
 		# The next line will be the first relative. And we'll have relative information until we see the data 'www.declaration.gov.ge'
 		i += 1
@@ -209,7 +254,8 @@ Dir.foreach(en_xml_folder) do |item|
 
 	for i in 0..first_page_ka.length-1
 	    relative_index = 0
-
+	    
+	    # We get information about the MP, in Georgian
 	    if first_page_ka[i].children.text == "დაბადების ადგილი, დაბადების თარიღი: "
 		place_dob_array = first_page_ka[i+1].children.text.split(', ')
 		all_info = {}
@@ -224,6 +270,7 @@ Dir.foreach(en_xml_folder) do |item|
 
 	    end
 
+	    # We get information about the relatives, in Georgian
 	    if first_page_ka[i].children.text == "კავშირი"
 		# The next line will be the first relative, this time in Georgian. And like before, we'll have relative information until we see the data 'www.declaration.gov.ge'
 		i += 1
@@ -268,10 +315,7 @@ Dir.foreach(en_xml_folder) do |item|
 	    i += 1
 	end
 
-	puts all_family_info
-
-
-	insert_query = "INSERT INTO representative_declaration (ad_id, name_ka) VALUES (#{declaration_id},'#{full_name_ka}');"
+	insert_query = "INSERT INTO representative_declaration (ad_id, name_ka, submission_date) VALUES (#{declaration_id},'#{full_name_ka}',STR_TO_DATE('#{submission_date}','%d/%m/%Y'));"
         mysql.query(insert_query)
 
         if is_married
@@ -285,17 +329,18 @@ Dir.foreach(en_xml_folder) do |item|
 	family_income_array = []
 
         # Extracting main salary, and family income. 
-	# This information can be found on page 8 or 9.
+	# This information can be found on page 8, 9 or even 10.
         salary_page = doc.xpath('//page[@number="8"]/text')
-	right_info_found = false
-        for i in 0..salary_page.length-1
-	    if salary_page[i].children.text.include? 'Have you or your family members undertaken any type of paid work in Georgia or abroad,'
-		right_info_found = true
-		break	    
-	    end
-	end
+	message = 'Have you or your family members undertaken any type of paid work in Georgia or abroad,'
+	right_info_found = is_it_the_right_page(salary_page, message)
 	if !right_info_found
 	    salary_page = doc.xpath('//page[@number="9"]/text')
+	    right_info_found = is_it_the_right_page(salary_page, message)
+	end
+
+	if !right_info_found
+	    salary_page = doc.xpath('//page[@number="10"]/text')
+	    right_info_found = is_it_the_right_page(salary_page, message)
 	end
 
         main_salary = 0.0
@@ -305,7 +350,7 @@ Dir.foreach(en_xml_folder) do |item|
 	current_name = ''
 	people_index_found = false
 	people_index = 0
-	while !people_index_found
+	while (people_index <= salary_page.length-1) && (!people_index_found)
 	    if salary_page[people_index].children.text.include? 'December)'
 		people_index_found = true
 		people_index += 1
@@ -325,18 +370,21 @@ Dir.foreach(en_xml_folder) do |item|
 	    elsif col_index == 2 # "Job title" column
 		#family_income["fam_title"] = salary_page[i].children.text
 	    else # "Income received" column
-		family_income[current_name] = salary_page[i].children.text.to_f
+		income_received = salary_page[i].children.text.split(' ')[0]
+		family_income[current_name] += income_received.to_f
 	    end
 	    col_index = define_next_index(i,salary_page,col_index,3)
 	end
 
         for i in 0..salary_page.length-1
 	    if salary_page[i].children.text == full_name
-	        while !salary_page[i].children.text.include? 'GEL'
+	        while (i <= salary_page.length-1) && (!salary_page[i].children.text.include? 'GEL')
 		    i += 1
 	        end
-	        amount = salary_page[i].children.text.split(' ')[0].to_f
-	        main_salary += amount
+		if i <= salary_page.length-1
+	            amount = salary_page[i].children.text.split(' ')[0].to_f
+	            main_salary += amount
+		end
    	    end
   	    i += 1
         end
@@ -349,7 +397,7 @@ Dir.foreach(en_xml_folder) do |item|
 		car_info = ''
 		car_name_owner_en = car_page[i-1].children.text
 		i += 1
-		while car_page[i].attributes["left"].value > car_page[i-1].attributes["left"].value # while we are on the same line
+		while (i <= car_page.length-1) && (car_page[i].attributes["left"].value > car_page[i-1].attributes["left"].value) # while we are on the same line
 		    car_info += "#{car_page[i].children.text} "
 		    i += 1
 		end
@@ -362,7 +410,7 @@ Dir.foreach(en_xml_folder) do |item|
         salary_page = doc.xpath('//page[@number="7"]/text')
 	right_info_found = false
         for i in 0..salary_page.length-1
-	    if salary_page[i].children.text.include? 'Have you or your family members undertaken any type of entrepreneurial activity?,'
+	    if salary_page[i].children.text.include? 'Have you or your family members undertaken any type of entrepreneurial activity?'
 		right_info_found = true
 		break	    
 	    end
@@ -374,31 +422,62 @@ Dir.foreach(en_xml_folder) do |item|
         i = 0
         for i in 0..salary_page.length-1
 	    if salary_page[i].children.text == full_name
-	        while !salary_page[i].children.text.include? 'GEL'
+	        while (i <= salary_page.length-1) && (!salary_page[i].children.text.include? 'GEL')
 		    i += 1
 	        end
-	        amount = salary_page[i].children.text.split(' ')[0].to_f
-	        entr_salary += amount
+		if i <= salary_page.length-1
+	            amount = salary_page[i].children.text.split(' ')[0].to_f
+	            entr_salary += amount
+		end
   	    end
   	    i += 1
         end
 
     
-        # Extracting the expenses
-        en_expenses_array = extract_several_lines(doc, 11, full_name)
-        ka_expenses_array = extract_several_lines(doc_ka, 11, full_name)
-
         # Extracting the property assets
-        en_property_asset_array = extract_several_lines(doc, 2, full_name)
-        ka_property_asset_array = extract_several_lines(doc_ka, 2, full_name)
+	property_page = doc.xpath('//page[@number="2"]/text')
+	en_property_array = get_property_expenses_info("share in percentage","the property, as well as", property_page, full_name)
+	property_page = doc_ka.xpath('//page[@number="2"]/text')
+	ka_property_array = get_property_expenses_info("მისი პროცენტული წილი","თანამესაკუთრე თქვენი ოჯახის",property_page, full_name_ka)
+
+
+        # Extracting the expenses from the english file (can be on page 11, 12 or 13)
+	expenses_page = doc.xpath('//page[@number="11"]/text')
+	message = ' any income or had any expenditures during the reporting period'
+	right_info_found = is_it_the_right_page(expenses_page, message)
+	if !right_info_found
+	    expenses_page = doc.xpath('//page[@number="12"]/text')
+	    right_info_found = is_it_the_right_page(expenses_page, message)
+	end
+
+	if !right_info_found
+	    expenses_page = doc.xpath('//page[@number="13"]/text')
+	    right_info_found = is_it_the_right_page(expenses_page, message)
+	end
+	en_expenses_array = get_property_expenses_info("expenditures","Amount (price) of income", expenses_page, full_name)
+
+        # Extracting the expenses from the georgian file (can be on page 11, 12 or 13)
+	expenses_page = doc_ka.xpath('//page[@number="11"]/text')
+	message = 'დეკემბრის ჩათვლით თქვენი ან თქვენი ოჯახის წევრის ნებისმიერი შემოსავალი'
+	right_info_found = is_it_the_right_page(expenses_page, message)
+	if !right_info_found
+	    expenses_page = doc_ka.xpath('//page[@number="12"]/text')
+	    right_info_found = is_it_the_right_page(expenses_page, message)
+	end
+
+	if !right_info_found
+	    expenses_page = doc_ka.xpath('//page[@number="13"]/text')
+	    right_info_found = is_it_the_right_page(expenses_page, message)
+	end
+	ka_expenses_array = get_property_expenses_info("(ღირებულება)","ემოსავლის ან/და გასავლის ოდენო", expenses_page, full_name_ka)
 
         
         insert_query = "INSERT INTO representative_representative (submission_date, name_ka, entrepreneurial_salary, main_salary, declaration_id, family_status_en, \
 	  	    family_status_ka, expenses_en, expenses_ka, property_assets_en, property_assets_ka) VALUES\
-		    (STR_TO_DATE(#{submission_date},'%d/%m/%Y'),'#{full_name_ka}', #{entr_salary}, #{main_salary}, #{declaration_id}, '#{family_status_en}', \
-		    '#{family_status_ka}', '#{en_expenses_array.join('; ')}', '#{ka_expenses_array.join('; ')}', '#{en_property_asset_array.join('; ')}', '#{ka_property_asset_array.join('; ')}');"
-	mysql.query(insert_query)
+		    (STR_TO_DATE('#{submission_date}','%d/%m/%Y'),'#{full_name_ka}', #{entr_salary}, #{main_salary}, #{declaration_id}, '#{family_status_en}', \
+		    '#{family_status_ka}', '#{en_expenses_array.join('; ')}', '#{ka_expenses_array.join('; ')}', '#{en_property_array.join('; ')}', '#{ka_property_array.join('; ')}');"
 
+	mysql.query(insert_query)
 
 	# Extracting now information about family members assets
 	family_income.each do |key, value| # key is full english name, value is this person's income
@@ -420,10 +499,11 @@ Dir.foreach(en_xml_folder) do |item|
 	        else
 		    car_value = ''
 	        end
+
 	        insert_query = "INSERT INTO representative_family_income (ad_id,submission_date,fam_name_en,fam_name_ka,fam_role_en,fam_role_ka,fam_gender, \
 			    fam_date_of_birth,fam_income,fam_cars) VALUES \
-			    (#{declaration_id},STR_TO_DATE(#{submission_date},'%d/%m/%Y'),'#{all_family_info[i]['full_name_en']}','#{all_family_info[i]['full_name_ka']}','#{all_family_info[i]['role_en']}','#{all_family_info[i]['role_ka']}','',\
-			    STR_TO_DATE(#{all_family_info[i]['date_of_birth']},'%d/%m/%Y'),#{family_income[key]},'#{car_value}');"
+			    (#{declaration_id},STR_TO_DATE('#{submission_date}','%d/%m/%Y'),'#{all_family_info[i]['full_name_en']}','#{all_family_info[i]['full_name_ka']}','#{all_family_info[i]['role_en']}','#{all_family_info[i]['role_ka']}','',\
+			    STR_TO_DATE('#{all_family_info[i]['date_of_birth']}','%d/%m/%Y'),#{family_income[key]},'#{car_value}');"
 	        mysql.query(insert_query)
 	    end
 	end
@@ -432,6 +512,8 @@ Dir.foreach(en_xml_folder) do |item|
 
     f.close
     f_ka.close
+
+    index_folder += 1
 
 end
 
