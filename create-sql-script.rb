@@ -57,7 +57,8 @@ end
 query = "SELECT distinct(name_ka) FROM representative_representative;"
 
 results = mysql.query(query)
-	
+
+rep_ad_hash = {} # key => ad_id, value => name_ka
 results.each do |row|
     query_to_write = "DELETE FROM representative_url WHERE representative_id=(SELECT person_id FROM popit_personname WHERE name_ka='#{row['name_ka']}') AND (label LIKE 'Asset%');"
     File.open(filename,'a') { |file| file.write(query_to_write+"\n") }
@@ -66,8 +67,10 @@ results.each do |row|
     results_declaration = mysql.query(query)
 
     results_declaration.each do |decl|
-	query_to_write = "INSERT INTO representative_url (representative_id,label,label_en,label_ka,url) VALUES ((SELECT person_id FROM popit_personname WHERE name_ka='#{decl['name_ka']}'),'Asset Declaration (#{decl['submission_date']})','Asset Declaration (#{decl['submission_date']})','ქონებრივი დეკლარაცია (#{decl['submission_date']})','https://declaration.gov.ge/declaration/#{decl['ad_id']}');"
+	query_to_write = "INSERT INTO representative_url (representative_id,label,label_en,label_ka,url) VALUES ((SELECT person_id FROM popit_personname WHERE name_ka='#{decl['name_ka']}'),'Asset Declaration (#{decl['submission_date']})','Asset Declaration (#{decl['submission_date']})','ქონებრივი დეკლარაცია (#{decl['submission_date']})','#{decl['ad_id']}');"
 	File.open(filename,'a') { |file| file.write(query_to_write+"\n") }
+
+	rep_ad_hash[decl['ad_id']] = decl['name_ka']
     end
 
 end
@@ -86,7 +89,7 @@ results.each do |row|
     results_fam = mysql.query(query)
 
     results_fam.each do |fam|
-	query_to_write = "INSERT INTO representative_familyincome (representative_id,ad_id,submission_date,fam_name,fam_role,fam_gender,fam_date_of_birth,fam_income,fam_cars) VALUES ((SELECT person_id FROM popit_personname WHERE name_ka='#{fam['fam_name_ka']}'),#{fam['ad_id']}, TO_DATE('#{fam['submission_date']}','YYYY-MM-DD'), '#{fam['fam_name_ka']}', '#{fam['fam_role_ka']}','', TO_DATE('#{fam['fam_date_of_birth']}','YYYY-MM-DD'), #{fam['fam_income']}, #{fam['fam_cars']});"
+	query_to_write = "INSERT INTO representative_familyincome (representative_id,ad_id,submission_date,fam_name,fam_role,fam_gender,fam_date_of_birth,fam_income,fam_cars) VALUES ((SELECT person_id FROM popit_personname WHERE name_ka='#{rep_ad_hash[fam['ad_id']]}'),#{fam['ad_id']}, TO_DATE('#{fam['submission_date']}','YYYY-MM-DD'), '#{fam['fam_name_ka']}', '#{fam['fam_role_ka']}','', TO_DATE('#{fam['fam_date_of_birth']}','YYYY-MM-DD'), #{fam['fam_income']}, '#{fam['fam_cars']}');"
 
         File.open(filename,'a') { |file| file.write(query_to_write+"\n") }
 

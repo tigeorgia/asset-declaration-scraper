@@ -94,12 +94,18 @@ def get_property_expenses_info(message,previous_message,property_page,full_name)
 	    i += 1
 	    col_index = 0
 	    is_main_person = false
+	    info = []
 	    while i <= property_page.length-1 && property_page[i].children.text != 'www.declaration.gov.ge'
 	    	if col_index == 0
+		    if info.length > 0
+			property_array << info.join(' ').gsub(',,','')
+		    end
+		    info = []
 		    is_main_person = property_page[i].children.text == full_name
 	    	elsif col_index == 2
 		    if is_main_person
-		        property_array << property_page[i].children.text.gsub('\'','')
+			# Cleaning the data
+			info << property_page[i].children.text.gsub('\'','').gsub('; ','').gsub(',,','')
 		    end
 	    	end
 	        col_index = define_next_index(i,property_page,col_index,3)
@@ -478,6 +484,7 @@ Dir.foreach(en_xml_folder) do |item|
 		    '#{family_status_ka}', '#{en_expenses_array.join('; ')}', '#{ka_expenses_array.join('; ')}', '#{en_property_array.join('; ')}', '#{ka_property_array.join('; ')}');"
 
 	mysql.query(insert_query)
+
 
 	# Extracting now information about family members assets
 	family_income.each do |key, value| # key is full english name, value is this person's income
