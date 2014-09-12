@@ -21,7 +21,7 @@
 #     port: 3306
 #     reconnect: true
 # - indicate the location of the database.yml file, into the db_config_path variable
-# - you will need to create the database and the tables
+# - you will need to create the database. Tables will be created if they don't exist.
 ####################################################
 
 require 'nokogiri'
@@ -130,6 +130,53 @@ db_config = YAML.load_file(db_config_path)
 mysql = Mysql2::Client.new(:host => db_config["host"], :port => db_config["port"], :database => db_config["database"], :username => db_config["username"], 
 			   :password => db_config["password"], :encoding => db_config["encoding"], :reconnect => db_config["reconnect"])
 
+# Tables are created if they don't exist
+
+
+query = "CREATE TABLE IF NOT EXISTS `representative_declaration` ( \
+  `id` int(11) NOT NULL AUTO_INCREMENT, \
+  `ad_id` int(11) DEFAULT NULL, \
+  `name_ka` varchar(300) DEFAULT NULL, \
+  `submission_date` date DEFAULT NULL, \
+  PRIMARY KEY (`id`) \
+) ENGINE=InnoDB AUTO_INCREMENT=101228 DEFAULT CHARSET=utf8;"
+
+mysql.query(query)
+
+query = "CREATE TABLE IF NOT EXISTS `representative_family_income` ( \
+  `id` int(11) NOT NULL AUTO_INCREMENT, \
+  `ad_id` int(11) DEFAULT NULL, \
+  `submission_date` date DEFAULT NULL, \
+  `fam_name_en` varchar(100) DEFAULT NULL, \
+  `fam_name_ka` varchar(100) DEFAULT NULL, \
+  `fam_role_en` varchar(45) DEFAULT NULL, \
+  `fam_role_ka` varchar(45) DEFAULT NULL, \
+  `fam_gender` varchar(2) DEFAULT NULL, \
+  `fam_date_of_birth` date DEFAULT NULL, \
+  `fam_income` varchar(45) DEFAULT NULL, \
+  `fam_cars` varchar(100) DEFAULT NULL, \
+  PRIMARY KEY (`id`) \
+) ENGINE=InnoDB AUTO_INCREMENT=156403 DEFAULT CHARSET=utf8;"
+
+mysql.query(query)
+
+query = "CREATE TABLE IF NOT EXISTS `representative_representative` (\
+  `person_ptr_id` int(11) NOT NULL AUTO_INCREMENT, \
+  `name_ka` varchar(300) DEFAULT NULL, \
+  `submission_date` date DEFAULT NULL, \
+  `entrepreneurial_salary` varchar(45) DEFAULT NULL, \
+  `main_salary` varchar(45) DEFAULT NULL, \
+  `declaration_id` int(11) DEFAULT NULL, \
+  `family_status_en` varchar(45) DEFAULT NULL, \
+  `family_status_ka` varchar(45) DEFAULT NULL, \
+  `expenses_en` varchar(500) DEFAULT NULL, \
+  `expenses_ka` varchar(500) DEFAULT NULL, \
+  `property_assets_en` varchar(1500) DEFAULT NULL, \
+  `property_assets_ka` varchar(1500) DEFAULT NULL, \
+  PRIMARY KEY (`person_ptr_id`) \
+) ENGINE=InnoDB AUTO_INCREMENT=101166 DEFAULT CHARSET=utf8;"
+
+mysql.query(query)
 
 # We loop through all the XML declarations files.
 index_folder = 1.00
