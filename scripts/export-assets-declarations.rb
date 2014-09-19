@@ -167,6 +167,8 @@ query = "CREATE TABLE IF NOT EXISTS `representative_representative` (\
   `entrepreneurial_salary` varchar(45) DEFAULT NULL, \
   `main_salary` varchar(45) DEFAULT NULL, \
   `declaration_id` int(11) DEFAULT NULL, \
+  `position_en` varchar(500) DEFAULT NULL, \
+  `position_ka` varchar(500) DEFAULT NULL, \
   `family_status_en` varchar(45) DEFAULT NULL, \
   `family_status_ka` varchar(45) DEFAULT NULL, \
   `expenses_en` varchar(500) DEFAULT NULL, \
@@ -234,15 +236,17 @@ Dir.foreach(en_xml_folder) do |item|
         # Extract the family status
         family_status_en = ''
         family_status_ka = ''
+	position_en = ''
+	position_ka = ''
 	family_member_income = {} # list of keys for this hash: fam_name_en, fam_name_ka, fam_organisation fam_role_en, fam_role_ka, fam_gender, fam_date_of_birth, fam_income, fam_cars
 	family_info = []
 	all_family_info = []
         is_married = false
         i = 0
 	for i in 0..first_page.length-1
-	    
+
 	    if first_page[i].children.text == "Place of Birth, Date of Birth: "
-		# We first get information about the MP.
+		# We get information about the MP.
 		family_member_income['full_name_en'] = full_name
 		family_member_income['full_name_ka'] = full_name_ka
 		place_dob_array = first_page[i+1].children.text.split(', ')
@@ -257,6 +261,11 @@ Dir.foreach(en_xml_folder) do |item|
 		family_member_income['role_ka'] = ''
 
 		family_info << family_member_income
+	    end
+
+	    if first_page[i].children.text == "Organisation, Position:"
+		# We get information about the person's position
+		position_en = first_page[i+1].children.text
 	    end
 
 	    # We get here inforamtion about the relatives (available on the declaration first page)
@@ -321,6 +330,20 @@ Dir.foreach(en_xml_folder) do |item|
 		all_info = family_info[relative_index].merge(all_info)
 		all_family_info << all_info
 
+	    end
+
+	    if first_page_ka[i].children.text == "სამსახური, დაკავებული (ყოფილი) თანამდებობა:"
+		# We get information about the person's position, in Georgian
+		j = i+1
+		position_ka = first_page_ka[j].children.text
+		line_index = first_page_ka[j].attributes["left"].value.to_i
+		next_line_index = first_page_ka[j+1].attributes["left"].value.to_i
+		while next_line_index - line_index > 100
+		    # we're still on the same line, and gathering information about the position.
+		    position_ka += " " + first_page_ka[j+1].children.text
+		    j += 1
+		    next_line_index = first_page_ka[j+1].attributes["left"].value.to_i
+		end
 	    end
 
 	    # We get information about the relatives, in Georgian
@@ -525,9 +548,9 @@ Dir.foreach(en_xml_folder) do |item|
 	ka_expenses_array = get_property_expenses_info("(ღირებულება)","ემოსავლის ან/და გასავლის ოდენო", expenses_page, full_name_ka)
 
         
-        insert_query = "INSERT INTO representative_representative (submission_date, name_ka, entrepreneurial_salary, main_salary, declaration_id, family_status_en, \
+        insert_query = "INSERT INTO representative_representative (submission_date, name_ka, position_en, position_ka, entrepreneurial_salary, main_salary, declaration_id, family_status_en, \
 	  	    family_status_ka, expenses_en, expenses_ka, property_assets_en, property_assets_ka) VALUES\
-		    (STR_TO_DATE('#{submission_date}','%d/%m/%Y'),'#{full_name_ka}', #{entr_salary}, #{main_salary}, #{declaration_id}, '#{family_status_en}', \
+		    (STR_TO_DATE('#{submission_date}','%d/%m/%Y'),'#{full_name_ka}', '#{position_en}', '#{position_ka}', #{entr_salary}, #{main_salary}, #{declaration_id}, '#{family_status_en}', \
 		    '#{family_status_ka}', '#{en_expenses_array.join('; ')}', '#{ka_expenses_array.join('; ')}', '#{en_property_array.join('; ')}', '#{ka_property_array.join('; ')}');"
 
 	mysql.query(insert_query)

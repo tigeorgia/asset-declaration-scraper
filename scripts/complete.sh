@@ -33,12 +33,18 @@ $SCRIPTS_FOLDER/downloadpdf.sh
 $SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 
 # The XML files have been generated, we can now turn them into CSV files
-$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "main"
+#$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "main"
 
 # This script create a CSV and XML files, which are a join of people's information with asset declaration ids.
-$SCRIPTS_FOLDER/createJoinTablesFiles.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "join"
+#$SCRIPTS_FOLDER/createJoinTablesFiles.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "join"
 
 # Archiving the newly downloaded and created files
 $SCRIPTS_FOLDER/archive.sh
+
+# Importing data into MySQL database
+ruby $SCRIPTS_FOLDER/export_assets-declarations.rb
+
+# Creating the SQL file to update MP's profile on myparliament.ge
+ruby $SCRIPTS_FOLDER/create-sql-script.rb
 
 echo "All done."

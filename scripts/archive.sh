@@ -37,45 +37,19 @@ mv $PDF_OUTPUT/ka/* $BASEDIR/archive/pdf/ka/
 
 # Archiving XMl files, created from the PDF files
 echo "Archiving XML files created from PDF files..."
-mv $XML_OUTPUT/en/* $BASEDIR/archive/xml/en/
-mv $XML_OUTPUT/ka/* $BASEDIR/archive/xml/ka/
+cp $XML_OUTPUT/en/* $BASEDIR/archive/xml/en/
+cp $XML_OUTPUT/ka/* $BASEDIR/archive/xml/ka/
 
 # Archiving/replacing CSV and XML output files
-echo "Archiving output files..."
-cp -f $OUTPUT/csv/en/* $BASEDIR/archive/output/csv/en/
-cp -f $OUTPUT/csv/ka/* $BASEDIR/archive/output/csv/ka/
-cp -f $OUTPUT/xml/en/* $BASEDIR/archive/output/xml/en/
-cp -f $OUTPUT/xml/ka/* $BASEDIR/archive/output/xml/ka/
-cp -f $OUTPUT/csv/JoinResults.csv $BASEDIR/archive/output/csv/
-cp -f $OUTPUT/xml/JoinResults.xml $BASEDIR/archive/output/xml/
+#echo "Archiving output files..."
+#cp -f $OUTPUT/csv/en/* $BASEDIR/archive/output/csv/en/
+#cp -f $OUTPUT/csv/ka/* $BASEDIR/archive/output/csv/ka/
+#cp -f $OUTPUT/xml/en/* $BASEDIR/archive/output/xml/en/
+#cp -f $OUTPUT/xml/ka/* $BASEDIR/archive/output/xml/ka/
+#cp -f $OUTPUT/csv/JoinResults.csv $BASEDIR/archive/output/csv/
+#cp -f $OUTPUT/xml/JoinResults.xml $BASEDIR/archive/output/xml/
 
 echo "Done. The files have been archived in "$BASEDIR"/archive"
-echo "Sending report e-mail"
-
-numberOfDownloadedDeclarations=$(ls -l $PATH_TO_SCRAPPER/output/en | wc -l)
-
-cat > emailToSend <<endmsg
---- Asset Declaration Scraper - $now - report ---
-
-Number of downloaded declarations: $numberOfDownloadedDeclarations, in each language.
-
-Declaration ids can be found in $BASEDIR/archive/declarationids/declarationids-$now
-
-Information added in CSV files:
-endmsg
-
-while read p; do
-    countBefore=$(grep "$p" $BASEDIR/countBeforeUpdate | cut -d ' ' -f1)
-    countAfter=$(grep "$p" $BASEDIR/countAfterUpdate | cut -d ' ' -f1)
-    numLines=`expr $countAfter - $countBefore`
-    echo "$p: $numLines line(s) added" >> emailToSend
-done < $SCRIPTS_FOLDER/listOfCsvNames.csv
-
-# We are not sending the e-mail yet, we need a valid e-mail account for this.
-
-# Delete the temporary files used for counts.
-rm $BASEDIR/countBeforeUpdate
-rm $BASEDIR/countAfterUpdate
 
 echo "Archiving done."
 
