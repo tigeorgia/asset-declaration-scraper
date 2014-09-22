@@ -47,4 +47,10 @@ ruby $SCRIPTS_FOLDER/export_assets-declarations.rb
 # Creating the SQL file to update MP's profile on myparliament.ge
 ruby $SCRIPTS_FOLDER/create-sql-script.rb
 
+if [ -f "RepresentativeTableUpdate.sql" ]; then
+    # uploads the sql file to shenmartav server, and runs it once uploaded.
+    $SCRIPTS_FOLDER/sshToShenmartavServer.sh
+fi
+
+
 echo "All done."
