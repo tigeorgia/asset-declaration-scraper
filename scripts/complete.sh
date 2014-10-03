@@ -3,7 +3,7 @@
 # Update the following line with one of these 2 values: 'dev' or 'prod'
 # - Choose 'prod' if you are running the scripts from a remote server
 # - Choose 'dev' if you are running the scripts in a development environment (ie your work machine).
-ENVIRONMENT=dev
+#ENVIRONMENT=dev
 
 # Update the following variable, to choose which Github branch you want to update your project from.
 # Leave the value to 'master' by default.
@@ -15,7 +15,7 @@ BASEDIR=$PWD
 PATH_TO_SCRAPPER=$BASEDIR/declarationScrapy
 PDF_OUTPUT=$PATH_TO_SCRAPPER/output
 XML_OUTPUT=$BASEDIR/xmloutput
-OUTPUT=$BASEDIR/output
+#OUTPUT=$BASEDIR/output
 SCRIPTS_FOLDER=$BASEDIR/scripts
 
 # Compile and package the Java application.

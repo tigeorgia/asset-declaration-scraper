@@ -28,8 +28,8 @@ require 'nokogiri'
 require 'mysql2'
 require 'yaml'
 
-en_xml_folder = '/home/etienne/workspace/test/xmloutput/en/'
-ka_xml_folder = '/home/etienne/workspace/test/xmloutput/ka/'
+en_xml_folder = '/home/etienne/workspace/test/xmloutput/testen/'
+ka_xml_folder = '/home/etienne/workspace/test/xmloutput/testka/'
 db_config_path = '/home/etienne/workspace/test/asset-declaration-scraper/database.yml'
 
 
@@ -127,17 +127,21 @@ end
 #
 #########################################
 def writeInfoFromCell(hash,key,text)
-    if hash[key]
-		hash[key] += " "+text
-    else
-		hash[key] = text
-    end
+	if !text.include?('www.declaration.gov.ge')
+		if hash[key]
+			hash[key] += " "+text.gsub('\'','').gsub('; ','').gsub(',,','')
+		else
+			hash[key] = text.gsub('\'','').gsub('; ','').gsub(',,','')
+		end
+	end
 end
 
 
 def get_info_from_question (doc, doc_ka, messages, headers, keys)
 	results = []
 	index = 0
+	
+	istest = (messages['en'] == 'Do you or your family members own any movable property (except for cash, securities, bank')
 	
 	page_numbers = define_page_numbers(doc, messages['en'])
 	
@@ -209,8 +213,7 @@ def get_info_from_question (doc, doc_ka, messages, headers, keys)
 					col_index = define_next_index(i, page, col_index, keys['ka'].length)
 										
 					if col_index < old_col_index
-						if (ka_data.length == keys['ka'].length) && (results[index])
-							
+						if (ka_data.has_key?(keys['ka'][0])) && (results[index])
 							results[index] = (results[index]).merge(ka_data)
 							# New line in the table, we increment the hash index of 1
 							index += 1
@@ -251,8 +254,10 @@ mysql = Mysql2::Client.new(:host => db_config["host"], :port => db_config["port"
 
 query = "CREATE TABLE IF NOT EXISTS `declarations` ( \
   `id` int(11) NOT NULL AUTO_INCREMENT, \
-  `ad_id` int(11) DEFAULT NULL, \
-  `name_ka` varchar(300) DEFAULT NULL, \
+  `declaration_id` int(11) DEFAULT NULL, \
+  `name_en` varchar(100) DEFAULT NULL, \
+  `name_ka` varchar(100) DEFAULT NULL, \
+  `dob` date DEFAULT NULL, \
   `submission_date` date DEFAULT NULL, \
   PRIMARY KEY (`id`) \
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
@@ -261,16 +266,16 @@ mysql.query(query)
 
 query = "CREATE TABLE IF NOT EXISTS `family_members` ( \
   `id` int(11) NOT NULL AUTO_INCREMENT, \
-  `ad_id` int(11) DEFAULT NULL, \
-  `fam_name_en` varchar(100) DEFAULT NULL, \
-  `fam_name_ka` varchar(100) DEFAULT NULL, \
-  `fam_position_en` varchar(100) DEFAULT NULL, \
-  `fam_position_ka` varchar(100) DEFAULT NULL, \
-  `fam_pob_en` varchar(100) DEFAULT NULL, \
-  `fam_pob_ka` varchar(100) DEFAULT NULL, \
-  `fam_dob` date DEFAULT NULL, \
-  `fam_role_en` varchar(45) DEFAULT NULL, \
-  `fam_role_ka` varchar(45) DEFAULT NULL, \
+  `declaration_id` int(11) DEFAULT NULL, \
+  `name_en` varchar(100) DEFAULT NULL, \
+  `name_ka` varchar(100) DEFAULT NULL, \
+  `position_en` varchar(100) DEFAULT NULL, \
+  `position_ka` varchar(100) DEFAULT NULL, \
+  `pob_en` varchar(100) DEFAULT NULL, \
+  `pob_ka` varchar(100) DEFAULT NULL, \
+  `dob` date DEFAULT NULL, \
+  `role_en` varchar(45) DEFAULT NULL, \
+  `role_ka` varchar(45) DEFAULT NULL, \
   PRIMARY KEY (`id`) \
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;"
 
@@ -278,7 +283,7 @@ mysql.query(query)
 
 query = "CREATE TABLE IF NOT EXISTS `family_income` ( \
   `id` int(11) NOT NULL AUTO_INCREMENT, \
-  `ad_id` int(11) DEFAULT NULL, \
+  `declaration_id` int(11) DEFAULT NULL, \
   `name_en` varchar(100) DEFAULT NULL, \
   `name_ka` varchar(100) DEFAULT NULL, \
   `organisation_en` varchar(100) DEFAULT NULL, \
@@ -375,8 +380,8 @@ mysql.query(query)
 
 query = "CREATE TABLE IF NOT EXISTS `bank_accounts` (\
   `id` int(11) NOT NULL AUTO_INCREMENT, \
-  `name_en` varchar(300) DEFAULT NULL, \
-  `name_ka` varchar(300) DEFAULT NULL, \
+  `name_en` varchar(100) DEFAULT NULL, \
+  `name_ka` varchar(100) DEFAULT NULL, \
   `declaration_id` int(11) DEFAULT NULL, \
   `bank_name_en` varchar(500) DEFAULT NULL, \
   `bank_name_ka` varchar(500) DEFAULT NULL, \
@@ -388,10 +393,10 @@ query = "CREATE TABLE IF NOT EXISTS `bank_accounts` (\
 
 mysql.query(query)
 
-query = "CREATE TABLE IF NOT EXISTS `cashs` (\
+query = "CREATE TABLE IF NOT EXISTS `cash` (\
   `id` int(11) NOT NULL AUTO_INCREMENT, \
-  `name_en` varchar(300) DEFAULT NULL, \
-  `name_ka` varchar(300) DEFAULT NULL, \
+  `name_en` varchar(100) DEFAULT NULL, \
+  `name_ka` varchar(100) DEFAULT NULL, \
   `declaration_id` int(11) DEFAULT NULL, \
   `amount` varchar(45) DEFAULT NULL, \
   PRIMARY KEY (`id`) \
@@ -401,8 +406,8 @@ mysql.query(query)
 
 query = "CREATE TABLE IF NOT EXISTS `active_contracts` (\
   `id` int(11) NOT NULL AUTO_INCREMENT, \
-  `name_en` varchar(300) DEFAULT NULL, \
-  `name_ka` varchar(300) DEFAULT NULL, \
+  `name_en` varchar(100) DEFAULT NULL, \
+  `name_ka` varchar(100) DEFAULT NULL, \
   `declaration_id` int(11) DEFAULT NULL, \
   `subject_en` varchar(300) DEFAULT NULL, \
   `subject_ka` varchar(300) DEFAULT NULL, \
@@ -417,9 +422,11 @@ mysql.query(query)
 
 query = "CREATE TABLE IF NOT EXISTS `gifts` (\
   `id` int(11) NOT NULL AUTO_INCREMENT, \
-  `name_ka` varchar(300) DEFAULT NULL, \
+  `name_en` varchar(100) DEFAULT NULL, \
+  `name_ka` varchar(100) DEFAULT NULL, \
   `declaration_id` int(11) DEFAULT NULL, \
-  `price` varchar(45) DEFAULT NULL, \
+  `type_price_en` varchar(100) DEFAULT NULL, \
+  `type_price_ka` varchar(100) DEFAULT NULL, \
   `relationship_en` varchar(45) DEFAULT NULL, \
   `relationship_ka` varchar(45) DEFAULT NULL, \
   PRIMARY KEY (`id`) \
@@ -449,6 +456,7 @@ Dir.foreach(en_xml_folder) do |item|
     full_name_ka = ''
     declaration_id = 0
     submission_date = ''
+    dob = ''
     name_ka = ''
 
     first_page = doc.xpath('//page[@number="1"]/text')
@@ -462,7 +470,7 @@ Dir.foreach(en_xml_folder) do |item|
     end 
 
     # As we're dealing with a declaration, we check if there is already information about it in the database.
-    query = "SELECT count(1) FROM declarations WHERE ad_id = #{declaration_id};"
+    query = "SELECT count(1) FROM declarations WHERE declaration_id = #{declaration_id};"
     result = mysql.query(query)
     is_already_in_db = false
     result.each do |row|
@@ -487,7 +495,7 @@ Dir.foreach(en_xml_folder) do |item|
         family_status_ka = ''
 		position_en = ''
 		position_ka = ''
-		family_member = {} # list of keys for this hash: fam_name_en, fam_name_ka, fam_organisation fam_role_en, fam_role_ka, fam_gender, fam_date_of_birth, fam_income, fam_cars
+		family_member = {} # list of keys for this hash: name_en, name_ka, organisation, role_en, role_ka, gender, date_of_birth, income, cars
         is_married = false
         i = 0
 		for i in 0..first_page.length-1
@@ -504,6 +512,7 @@ Dir.foreach(en_xml_folder) do |item|
 				    family_member['place_of_birth'] = "#{place_dob_array[0..place_dob_array.length-2].join(', ')}"
 				    family_member['date_of_birth'] = place_dob_array[place_dob_array.length-1]
 			    end
+			    dob = family_member['date_of_birth']
 			end
 
 			if first_page[i].children.text == "Organisation, Position:"
@@ -556,13 +565,13 @@ Dir.foreach(en_xml_folder) do |item|
 
 
 		# We insert the main information about the current public official.
-		insert_query = "INSERT INTO family_members (ad_id, fam_name_en, fam_name_ka, fam_position_en, fam_position_ka, fam_pob_en, fam_pob_ka, fam_dob, fam_role_en, fam_role_ka) VALUES\
+		insert_query = "INSERT INTO family_members (declaration_id, name_en, name_ka, position_en, position_ka, pob_en, pob_ka, dob, role_en, role_ka) VALUES\
 				(#{declaration_id}, '#{family_member['full_name_en']}', '#{family_member['full_name_ka']}', '#{family_member['position_en']}', '#{family_member['position_ka']}', '#{family_member['place_of_birth']}', \
 				 '#{family_member['place_of_birth_ka']}', STR_TO_DATE('#{family_member['date_of_birth']}','%d/%m/%Y'), '#{family_status_en}', '#{family_status_ka}');"
         mysql.query(insert_query)
 
 
-		insert_query = "INSERT INTO declarations (ad_id, name_ka, submission_date) VALUES (#{declaration_id},'#{full_name_ka}',STR_TO_DATE('#{submission_date}','%d/%m/%Y'));"
+		insert_query = "INSERT INTO declarations (declaration_id, name_en, name_ka, dob, submission_date) VALUES (#{declaration_id}, '#{full_name}', '#{full_name_ka}', STR_TO_DATE('#{dob}','%d/%m/%Y'), STR_TO_DATE('#{submission_date}','%d/%m/%Y'));"
         mysql.query(insert_query)
         
         
@@ -581,7 +590,7 @@ Dir.foreach(en_xml_folder) do |item|
 		members = get_info_from_question(doc, doc_ka, messages, headers, keys)
 		
 		members.each do |member|
-			insert_query = "INSERT INTO family_members (ad_id, fam_name_en, fam_name_ka, fam_position_en, fam_position_ka, fam_pob_en, fam_pob_ka, fam_dob, fam_role_en, fam_role_ka) VALUES\
+			insert_query = "INSERT INTO family_members (declaration_id, name_en, name_ka, position_en, position_ka, pob_en, pob_ka, dob, role_en, role_ka) VALUES\
 				(#{declaration_id}, '#{member['first_name_en']} #{member['last_name_en']}', '#{member['first_name_ka']} #{member['last_name_ka']}', '', '', '#{member['pob_en']}', \
 				 '#{member['pob_ka']}', STR_TO_DATE('#{member['dob']}','%d/%m/%Y'), '#{member['relationship_en']}', '#{member['relationship_ka']}');"
 
@@ -627,7 +636,7 @@ Dir.foreach(en_xml_folder) do |item|
 		members = get_info_from_question(doc, doc_ka, messages, headers, keys)
 		
 		members.each do |member|
-			insert_query = "INSERT INTO family_income (ad_id, name_en, name_ka, organisation_en, organisation_ka, job_title_en, job_title_ka, income) VALUES\
+			insert_query = "INSERT INTO family_income (declaration_id, name_en, name_ka, organisation_en, organisation_ka, job_title_en, job_title_ka, income) VALUES\
 				(#{declaration_id}, '#{member['name_en']}', '#{member['name_ka']}', '#{member['organisation_en']}', '#{member['organisation_ka']}', '#{member['title_en']}', \
 				 '#{member['title_ka']}', '#{member['income']}');"
 
@@ -641,7 +650,7 @@ Dir.foreach(en_xml_folder) do |item|
 		messages['en'] = 'Do you or your family members own any movable property (except for cash, securities, bank'
 		messages['ka'] = 'თქვენი, თქვენი ოჯახის წევრის საკუთრებაში არსებული მოძრავი ქონება (ფასიანი ქაღალდების'
 		headers = {}
-		headers['en'] = 'percentages should be|indicated) '
+		headers['en'] = 'percentages should be|indicated)'
 		headers['ka'] = 'თანამესაკუთრე თქვენი ოჯახის წევრია|მიუთითეთ მისი პროცენტული წილი)'
 		keys = {}
 		keys['en'] = ['owner_en','type_en','details_en','common_owners_en']
@@ -651,8 +660,8 @@ Dir.foreach(en_xml_folder) do |item|
 		
 		properties.each do |property|
 			insert_query = "INSERT INTO movable_properties (owner_name_en, owner_name_ka, declaration_id, property_type_en, property_type_ka, details_en, details_ka, common_owners_en, common_owners_ka) VALUES\
-				('#{property['owner_en']}', '#{property['owner_ka']}', #{declaration_id}, '#{property['type_en']}', '#{account['type_ka']}', \
-				'#{property['details_en']}', '#{property['details_ka']}', '#{account['common_owners_en']}', '#{property['common_owners_ka']}');"
+				('#{property['owner_en']}', '#{property['owner_ka']}', #{declaration_id}, '#{property['type_en']}', '#{property['type_ka']}', \
+				'#{property['details_en']}', '#{property['details_ka']}', '#{property['common_owners_en']}', '#{property['common_owners_ka']}');"
 
 			mysql.query(insert_query)
 		end
@@ -695,15 +704,15 @@ Dir.foreach(en_xml_folder) do |item|
 		
 		gifts = get_info_from_question(doc, doc_ka, messages, headers, keys)
 		
-		gifts.each do |account|
+		gifts.each do |gift|
 			insert_query = "INSERT INTO gifts (name_en, name_ka, declaration_id, type_price_en, type_price_ka, relationship_en, relationship_ka) VALUES\
-				('#{account['name_en']}', '#{account['name_ka']}', #{declaration_id}, '#{account['type_price_en']}', '#{account['type_price_ka']}', \
-				'#{account['relationship_en']}', '#{account['relationship_ka']}');"
+				('#{gift['name_en']}', '#{gift['name_ka']}', #{declaration_id}, '#{gift['type_price_en']}', '#{gift['type_price_ka']}', \
+				'#{gift['relationship_en']}', '#{gift['relationship_ka']}');"
 
 			mysql.query(insert_query)
 		end
     
-    
+       
 		# Extracting hold cash information
 		# --------------------------------
 		messages = {}
@@ -719,7 +728,7 @@ Dir.foreach(en_xml_folder) do |item|
 		cashs = get_info_from_question(doc, doc_ka, messages, headers, keys)
 		
 		cashs.each do |cash|
-			insert_query = "INSERT INTO cashs (name_en, name_ka, declaration_id, amount) VALUES\
+			insert_query = "INSERT INTO cash (name_en, name_ka, declaration_id, amount) VALUES\
 				('#{cash['name_en']}', '#{cash['name_ka']}', #{declaration_id}, '#{cash['amount']}');"
 
 			mysql.query(insert_query)
@@ -767,7 +776,7 @@ Dir.foreach(en_xml_folder) do |item|
 			insert_query = "INSERT INTO entrepreneurial_activities (name_en, name_ka, declaration_id, address_en, address_ka, partnership_en, partnership_ka, registration_en, registration_ka, period_en, period_ka, income) VALUES\
 				('#{activity['name_en']}', '#{activity['name_ka']}', #{declaration_id}, '#{activity['address_en']}', '#{activity['address_ka']}', '#{activity['partnership_en']}', '#{activity['partnership_ka']}', \
 				 '#{activity['registration_en']}', '#{activity['registration_ka']}', '#{activity['period_en']}', '#{activity['period_ka']}', '#{activity['income']}');"
-
+			
 			mysql.query(insert_query)
 		end		
 		
