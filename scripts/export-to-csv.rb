@@ -11,7 +11,15 @@ db_config = YAML.load_file(db_config_path)
 $mysql = Mysql2::Client.new(:host => db_config["host"], :port => db_config["port"], :database => db_config["database"], :username => db_config["username"], 
 			   :password => db_config["password"], :encoding => db_config["encoding"], :reconnect => db_config["reconnect"])
 			   
+$current_folder = Dir.pwd
 $csv_folder = "output"
+
+Dir.foreach("#{$current_folder}/#{$csv_folder}") do |item|
+    next if item == '.' or item == '..'
+    if item.include? '.csv'
+        File.delete("#{$current_folder}/#{$csv_folder}/#{item}")
+    end
+end
 
 def writeInfoToCsv(table,result,cols)
 	
@@ -79,14 +87,14 @@ CSV.open("#{$csv_folder}/entrepreneurial_activities.csv", "a") do |csv|
 end
 
 CSV.open("#{$csv_folder}/family_income.csv", "a") do |csv|
-	row = ["# Have you or your family members undertaken any type of paid work in Georgia or abroad, except for working in an enterprise?"]
+	row = ["# Have you or your family members undertaken any type of paid work in Georgia or abroad; except for working in an enterprise?"]
 	csv << row
 	row = main_headers + ["Name (en)","Name (geo)","Organisation (en)","Organisation (geo)","Job title (en)","Job title (geo)","Income"]
 	csv << row
 end
 
 CSV.open("#{$csv_folder}/active_contracts.csv", "a") do |csv|
-	row = ["# Have you or your family members had any active contracts dating back from 1 January, in Georgia or abroad exceeding 3000 GEL (1800 USD approximately)?"]
+	row = ["# Have you or your family members had any active contracts dating back from 1 January; in Georgia or abroad exceeding 3000 GEL (1800 USD approximately)?"]
 	csv << row
 	row = main_headers + ["Name (en)","Name (geo)","Subject and value (en)","Subject and value (geo)","Signature (en)","Signature (geo)","Income contract (en)","Income contract (geo)"]
 	csv << row

@@ -74,7 +74,7 @@ Other scripts
 
 There are other scripts that have been written to respond to the need of various TIG staff members.
 
-1) 'export_to_csv.rb' has been written to export all the information about several declarations, into CSV files. Before running this script, make sure you provide a list of "Position", among those you can find in the drop down list, in the search section of declaration.gov.ge
+1) 'export_to_csv.rb' has been written to export all the information about several declarations, into CSV files. Before running this script, make sure you provide a list of "Position", among those you can find in the drop down list, in the search section of declaration.gov.ge, into 'scripts/input.csv' (rename the provided sample file)
 
 `ruby ./scripts/export_to_csv.rb`
 
