@@ -663,10 +663,20 @@ Dir.foreach(en_xml_folder) do |item|
 		properties = get_info_from_question(doc, doc_ka, messages, headers, keys)
 		
 		properties.each do |property|
-			name_en_array = property['owner_en'].split(' ')
-			this_name_en = name_en_array[0] + ' ' + name_en_array[1]
-			name_ka_array = property['owner_ka'].split(' ')
-			this_name_ka = name_ka_array[0] + ' ' + name_ka_array[1]
+			this_name_en = ''
+			this_name_ka = ''
+			if property['owner_en']
+				name_en_array = property['owner_en'].split(' ')
+				if (name_en_array) && (name_en_array.length >= 2)
+					this_name_en = name_en_array[0] + ' ' + name_en_array[1]
+				end
+			end
+			if property['owner_ka']
+				name_ka_array = property['owner_ka'].split(' ')
+				if (name_ka_array) && (name_ka_array.length >= 2)
+					this_name_ka = name_ka_array[0] + ' ' + name_ka_array[1]
+				end
+			end
 			insert_query = "INSERT INTO movable_properties (name_en, name_ka, owner_name_en, owner_name_ka, declaration_id, property_type_en, property_type_ka, details_en, details_ka, common_owners_en, common_owners_ka) VALUES\
 				('#{this_name_en}','#{this_name_ka}','#{property['owner_en']}', '#{property['owner_ka']}', #{declaration_id}, '#{property['type_en']}', '#{property['type_ka']}', \
 				'#{property['details_en']}', '#{property['details_ka']}', '#{property['common_owners_en']}', '#{property['common_owners_ka']}');"
@@ -804,10 +814,20 @@ Dir.foreach(en_xml_folder) do |item|
 		assets = get_info_from_question(doc, doc_ka, messages, headers, keys)
 
 		assets.each do |asset|
-			name_en_array = asset['name_share_en'].split(' ')
-			this_name_en = name_en_array[0] + ' ' + name_en_array[1]
-			name_ka_array = asset['name_share_ka'].split(' ')
-			this_name_ka = name_ka_array[0] + ' ' + name_ka_array[1]
+			this_name_en = ''
+			this_name_ka = ''
+			if asset['name_share_en']
+				name_en_array = asset['name_share_en'].split(' ')
+				if (name_en_array) && (name_en_array.length >= 2)
+					this_name_en = name_en_array[0] + ' ' + name_en_array[1]
+				end
+			end
+			if asset['name_share_ka']
+				name_ka_array = asset['name_share_ka'].split(' ')
+				if (name_ka_array) && (name_ka_array.length >= 2)
+					this_name_ka = name_ka_array[0] + ' ' + name_ka_array[1]
+				end
+			end
 			insert_query = "INSERT INTO property_assets (name_en, name_ka, name_share_en, name_share_ka, declaration_id, property_en, property_ka, location_en, location_ka, common_owners_en, common_owners_ka) VALUES\
 				('#{this_name_en}','#{this_name_ka}','#{asset['name_share_en']}', '#{asset['name_share_ka']}', #{declaration_id}, '#{asset['property_en']}', '#{asset['property_ka']}', '#{asset['location_en']}', '#{asset['location_ka']}', \
 				 '#{asset['common_owners_en']}', '#{asset['common_owners_ka']}');"
