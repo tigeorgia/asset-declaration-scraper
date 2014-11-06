@@ -19,7 +19,7 @@ XML_OUTPUT=$BASEDIR/xmloutput
 SCRIPTS_FOLDER=$BASEDIR/scripts
 
 # Compile and package the Java application.
-$SCRIPTS_FOLDER/checkoutAndPackageApp.sh $BRANCH
+#$SCRIPTS_FOLDER/checkoutAndPackageApp.sh $BRANCH
 
 # Get all the ids from declaration.gov.ge, and make a diff with the most available id list ($1), 
 # in order to define what are the new documents that have been posted, since the last time 
@@ -47,10 +47,10 @@ ruby $SCRIPTS_FOLDER/export_assets-declarations.rb
 # Creating the SQL file to update MP's profile on myparliament.ge
 ruby $SCRIPTS_FOLDER/create-sql-script.rb
 
-if [ -f "RepresentativeTableUpdate.sql" ]; then
+#if [ -f "RepresentativeTableUpdate.sql" ]; then
     # uploads the sql file to shenmartav server, and runs it once uploaded.
     $SCRIPTS_FOLDER/sshToShenmartavServer.sh
-fi
+#fi
 
 
 echo "All done."
