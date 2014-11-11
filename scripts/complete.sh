@@ -39,10 +39,10 @@ $SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 #$SCRIPTS_FOLDER/createJoinTablesFiles.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "join"
 
 # Archiving the newly downloaded and created files
-$SCRIPTS_FOLDER/archive.sh
+#$SCRIPTS_FOLDER/archive.sh
 
 # Importing data into MySQL database
-ruby $SCRIPTS_FOLDER/export_assets-declarations.rb
+ruby $SCRIPTS_FOLDER/export-assets-declarations.rb
 
 # Creating the SQL file to update MP's profile on myparliament.ge
 ruby $SCRIPTS_FOLDER/create-sql-script.rb
