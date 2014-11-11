@@ -24,7 +24,7 @@
 #############################################################################
 
 BASEDIR=$PWD
-PDFTOHTML=/usr/local/bin/pdftohtml
+#PDFTOHTML=/usr/local/bin/pdftohtml
 XML_OUTPUT=$BASEDIR/xmloutput
 #PDFTOHTML=poppler-0.16.7/utils/pdftohtml
 #PDFTOHTML=/wherever/poppler-0.16.7/utils/pdftohtml
@@ -60,7 +60,7 @@ echo "Converting English documents..."
 for f in `ls $PDF/en/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
-    $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
+    pdftohtml -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
     cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/en/$name.xml
 
     if xmllint --noout $XML_OUTPUT/en/$name.xml; then
@@ -75,7 +75,7 @@ echo "Converting Georgian documents..."
 for f in `ls $PDF/ka/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
-    $PDFTOHTML -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
+    pdftohtml -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
     cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/ka/$name.xml
 
     if xmllint --noout $XML_OUTPUT/ka/$name.xml; then
