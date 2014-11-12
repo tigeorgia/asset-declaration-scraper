@@ -60,13 +60,13 @@ echo "Converting English documents..."
 for f in `ls $PDF/en/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
-    pdftohtml -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
-    cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/en/$name.xml
+    pdftohtml -xml -enc "UTF-8" -i -q -c -hidden -noframes $f "$XML_OUTPUT"/test.xml
+    cat "$XML_OUTPUT"/test.xml | grep -v '^<!DOCTYPE' > "$XML_OUTPUT"/en/$name.xml
 
-    if xmllint --noout $XML_OUTPUT/en/$name.xml; then
+    if xmllint --noout "$XML_OUTPUT"/en/$name.xml; then
         continue
     else
-	rm $XML_OUTPUT/en/$name.xml
+	rm "$XML_OUTPUT"/en/$name.xml
         echo "WARNING: "+$name+".xml (English version) was not formed properly! It was removed automatically, to avoid any further processing problems."
     fi
 
@@ -75,17 +75,17 @@ echo "Converting Georgian documents..."
 for f in `ls $PDF/ka/*.pdf`; do
     name=$(basename $f .pdf)
     echo "Converting $name into XML file"
-    pdftohtml -xml -enc "UTF-8" -i -q -c -hidden -noframes $f $XML_OUTPUT/test.xml
-    cat $XML_OUTPUT/test.xml | grep -v '^<!DOCTYPE' > $XML_OUTPUT/ka/$name.xml
+    pdftohtml -xml -enc "UTF-8" -i -q -c -hidden -noframes $f "$XML_OUTPUT"/test.xml
+    cat "$XML_OUTPUT"/test.xml | grep -v '^<!DOCTYPE' > "$XML_OUTPUT"/ka/$name.xml
 
-    if xmllint --noout $XML_OUTPUT/ka/$name.xml; then
+    if xmllint --noout "$XML_OUTPUT"/ka/$name.xml; then
         continue
     else
-	rm $XML_OUTPUT/ka/$name.xml
+	rm "$XML_OUTPUT"/ka/$name.xml
         echo "WARNING: "+$name+".xml (Georgian version) was not formed properly! It was removed automatically, to avoid any further processing problems."
     fi
 done
-rm $XML_OUTPUT/test.xml
+rm "$XML_OUTPUT"/test.xml
 
 # Archiving the new declaration ids file, and also making it the new current declaration id file, to be used for the next scraping.
 now=$(date +'%Y-%m-%d')
