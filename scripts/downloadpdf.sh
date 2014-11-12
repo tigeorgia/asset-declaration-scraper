@@ -4,9 +4,6 @@ OUTPUT=idlistoutput
 BASEDIR=$PWD
 PATH_TO_SCRAPPER=$BASEDIR/declarationScrapy
 PDF_OUTPUT=$PATH_TO_SCRAPPER/output
-XML_OUTPUT=$BASEDIR/xmloutput
-CSV_OUTPUT=$BASEDIR/csvoutput
-SCRIPTS_FOLDER=$BASEDIR/scripts
 
 # Download the new PDFs, based on the really new ids.
 cd $PATH_TO_SCRAPPER

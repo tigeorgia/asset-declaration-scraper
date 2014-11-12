@@ -28,8 +28,8 @@ require 'nokogiri'
 require 'mysql2'
 require 'yaml'
 
-en_xml_folder = '/home/etienne/workspace/test/xmloutput/testen/'
-ka_xml_folder = '/home/etienne/workspace/test/xmloutput/testka/'
+en_xml_folder = '/home/etienne/workspace/test/xmloutput/en/'
+ka_xml_folder = '/home/etienne/workspace/test/xmloutput/ka/'
 db_config_path = '/home/etienne/workspace/test/asset-declaration-scraper/database.yml'
 
 

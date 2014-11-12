@@ -3,11 +3,6 @@
 OUTPUT=idlistoutput
 BASEDIR=$PWD
 PATH_TO_SCRAPPER=$BASEDIR/declarationScrapy
-PDF_OUTPUT=$PATH_TO_SCRAPPER/output
-XML_OUTPUT=$BASEDIR/xmloutput
-CSV_OUTPUT=$BASEDIR/csvoutput
-SCRIPTS_FOLDER=$BASEDIR/scripts
-
 
 # Get the new list of id, from the website
 cat $BASEDIR/currentdeclarationids | sort -g | sed '/^$/d' > sortedidlist
