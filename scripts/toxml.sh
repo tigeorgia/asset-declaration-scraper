@@ -30,6 +30,10 @@ XML_OUTPUT=$BASEDIR/xmloutput
 #PDFTOHTML=/wherever/poppler-0.16.7/utils/pdftohtml
 #############################################################################
 
+# Removing unused files
+rm "$BASEDIR"/newids
+rm "$BASEDIR"/sortedidlist
+
 if [ -z "$1" ]; then
     echo "Need directory to read PDF files from!"
     exit 1;
