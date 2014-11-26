@@ -252,11 +252,14 @@ mysql = Mysql2::Client.new(:host => db_config["host"], :port => db_config["port"
 # Tables are created if they don't exist
 
 
+# Postions added on 'declarations' table, to avoid costly query, when creating sql file for myparliament.ge
 query = "CREATE TABLE IF NOT EXISTS `declarations` ( \
   `id` int(11) NOT NULL AUTO_INCREMENT, \
   `declaration_id` int(11) DEFAULT NULL, \
   `name_en` varchar(100) DEFAULT NULL, \
   `name_ka` varchar(100) DEFAULT NULL, \
+  `position_en` varchar(100) DEFAULT NULL, \
+  `position_ka` varchar(100) DEFAULT NULL, \
   `dob` date DEFAULT NULL, \
   `submission_date` date DEFAULT NULL, \
   PRIMARY KEY (`id`) \
@@ -575,7 +578,7 @@ Dir.foreach(en_xml_folder) do |item|
         mysql.query(insert_query)
 
 
-		insert_query = "INSERT INTO declarations (declaration_id, name_en, name_ka, dob, submission_date) VALUES (#{declaration_id}, '#{full_name}', '#{full_name_ka}', STR_TO_DATE('#{dob}','%d/%m/%Y'), STR_TO_DATE('#{submission_date}','%d/%m/%Y'));"
+		insert_query = "INSERT INTO declarations (declaration_id, name_en, name_ka, position_en, position_ka, dob, submission_date) VALUES (#{declaration_id}, '#{full_name}', '#{full_name_ka}', '#{family_member['position_en']}', '#{family_member['position_ka']}', STR_TO_DATE('#{dob}','%d/%m/%Y'), STR_TO_DATE('#{submission_date}','%d/%m/%Y'));"
         mysql.query(insert_query)
         
         

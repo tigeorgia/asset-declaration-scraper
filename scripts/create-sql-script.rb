@@ -41,28 +41,30 @@ query = "SELECT decl.name_ka, decl.declaration_id, decl.submission_date \
     	     FROM declarations decl2 \
     	     GROUP BY decl2.name_ka) grouped_decl \
 	 ON decl.name_ka = grouped_decl.name_ka \
-	 AND decl.submission_date = grouped_decl.MaxDateTime;"
+	 AND decl.submission_date = grouped_decl.MaxDateTime \
+	 WHERE decl.position_en = 'Parliament of Georgia'";
 	 
-results = mysql.query(query)	 
+results = mysql.query(query)	
+decl_results_count = results.count.to_f 
 
-row_count = 1.00
+row_count = 1.0
 
 results.each do |row|
 
 	declaration_id = row['declaration_id']
 	name_ka = row['name_ka']
 	
-	percentage_done = ((row_count / (results.count.to_f)) * 100).round(2)
+	percentage_done = ((row_count / (decl_results_count)) * 100).round(2)
 	puts "Processing declaration #{declaration_id}  \t\t (1/3 - #{percentage_done}% done)"
 	
 	query = "SELECT fam1.role_en, fam1.role_ka \
 	 FROM family_members fam1 \
 	 WHERE fam1.declaration_id = #{declaration_id} \
-	 AND fam1.fam_name_ka = '#{name_ka}';"
+	 AND fam1.name_ka = '#{name_ka}';"
 	 
 	fam_results = mysql.query(query)
 	fam_results.each do |fam_row|
-		line = "UPDATE representative_representative SET submission_date=TO_DATE('#{row['submission_date']}','YYYY-MM-DD'), declaration_id=#{declaration_id}, family_status_en='#{fam_row['fam_role_en']}', family_status_ka='#{fam_row['fam_role_ka']}' WHERE person_ptr_id=(SELECT person_id FROM popit_personname WHERE name_ka='#{name_ka}');"
+		line = "UPDATE representative_representative SET submission_date=TO_DATE('#{row['submission_date']}','YYYY-MM-DD'), declaration_id=#{declaration_id}, family_status_en='#{fam_row['role_en']}', family_status_ka='#{fam_row['role_ka']}' WHERE person_ptr_id=(SELECT person_id FROM popit_personname WHERE name_ka='#{name_ka}');"
 		File.open(filename,'a') { |file| file.write(line+"\n") } 
 	end
 	
@@ -113,13 +115,14 @@ results.each do |row|
     
     File.open(filename,'a') { |file| file.write(line+"\n") } 
     
-    row_count += 1
+    row_count += 1.0
     
 end
 
 
 # Writing statement to update the representative_urls table now
-query = "SELECT distinct(name_ka) FROM family_members WHERE (position_en is not null && position_en != '')"
+#query = "SELECT distinct(name_ka) FROM family_members WHERE (position_en is not null && position_en != '')"
+query = "SELECT distinct(name_ka) FROM family_members WHERE position_en = 'Parliament of Georgia'"
 
 results = mysql.query(query)
 
@@ -151,7 +154,7 @@ results.each do |row|
 end
 
 # Writing statements to update representative_familyincome table now
-query = "SELECT min(declaration_id) as min_ad, max(declaration_id) as max_ad FROM declarations;"
+query = "SELECT min(declaration_id) as min_ad, max(declaration_id) as max_ad FROM declarations WHERE position_en = 'Parliament of Georgia';"
 results = mysql.query(query)
 
 
