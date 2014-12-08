@@ -28,10 +28,6 @@ require 'nokogiri'
 require 'mysql2'
 require 'yaml'
 
-en_xml_folder = '/home/etienne/workspace/test/xmloutput/en/'
-ka_xml_folder = '/home/etienne/workspace/test/xmloutput/ka/'
-db_config_path = '/home/etienne/workspace/test/asset-declaration-scraper/database.yml'
-
 
 #########################################
 #
@@ -238,7 +234,18 @@ end
 
 # Program starts here
 
-# First, make sure the config file exists
+# First, make sure the main config file exists
+main_config_path = '../config-export-asset-declarations.yml'
+if !File.exists?(main_config_path)
+  log.error "The config file with paths does not exist"
+  exit
+end
+
+main_config = YAML.load_file(main_config_path)
+en_xml_folder = main_config['enxml']
+ka_xml_folder = main_config['kaxml']
+db_config_path = main_config['database']
+
 if !File.exists?(db_config_path)
   log.error "The #{db_config_path} (config file) does not exist"
   exit
