@@ -235,7 +235,7 @@ end
 # Program starts here
 
 # First, make sure the main config file exists
-main_config_path = '../config-export-asset-declarations.yml'
+main_config_path = 'config-export-asset-declarations.yml'
 if !File.exists?(main_config_path)
   log.error "The config file with paths does not exist"
   exit
