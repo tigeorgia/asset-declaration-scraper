@@ -24,9 +24,22 @@
 require 'mysql2'
 require 'yaml'
 
-db_config_path = '/home/etienne/workspace/test/asset-declaration-scraper/database.yml'
-
 filename = "RepresentativeTableUpdate.sql"
+
+# First, make sure the main config file exists
+main_config_path = 'config-export-asset-declarations.yml'
+if !File.exists?(main_config_path)
+  log.error "The config file with paths does not exist"
+  exit
+end
+
+main_config = YAML.load_file(main_config_path)
+db_config_path = main_config['database']
+
+if !File.exists?(db_config_path)
+  log.error "The #{db_config_path} (config file) does not exist"
+  exit
+end
 
 # create connection to MySql database
 db_config = YAML.load_file(db_config_path)
