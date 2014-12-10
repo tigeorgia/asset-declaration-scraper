@@ -178,10 +178,10 @@ results.each do |row|
 
 	query = "SELECT fam.name_ka, fam.declaration_id, decl.submission_date, fam.name_en, fam.role_ka, fam.dob \
 			 FROM family_members fam, declarations decl \
-			 WHERE fam.declaration_id = decl.declaration_id AND fam.declaration_id >= #{row['min_ad']} AND fam.declaration_id <= #{row['max_ad']};"
+			 WHERE fam.declaration_id = decl.declaration_id AND fam.declaration_id >= #{row['min_ad']} AND fam.declaration_id <= #{row['max_ad']} AND decl.position_en = 'Parliament of Georgia'";
 
     results_fam = mysql.query(query)
-	row_count = 1.00
+    row_count = 1.00
 	
     results_fam.each do |fam|
 		member_name_ka = fam['name_ka']
@@ -214,7 +214,7 @@ results.each do |row|
 		
 		File.open(filename,'a') { |file| file.write(query_to_write+"\n") }
 		
-		row_count += 1
+		row_count += 1.00
 
     end
 
