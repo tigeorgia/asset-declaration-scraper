@@ -96,7 +96,8 @@ now=$(date +'%Y-%m-%d')
 
 # this file does not seem to be created so we'll cmpy/move it only if it exists
 if [ -f "$BASEDIR/declarationids-"$now ]; then
-	if [ -d "$BASEDIR/archive/declarationids" ]; then
+	# somehow the -p switch fails to do its check and the warning is still printed
+	if [ ! -d "$BASEDIR/archive/declarationids" ]; then
 		mkdir -p "$BASEDIR/archive/declarationids"
 	fi
 	cp "$BASEDIR/declarationids-"$now "$BASEDIR/archive/declarationids/"
