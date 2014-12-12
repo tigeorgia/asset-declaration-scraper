@@ -31,8 +31,8 @@ XML_OUTPUT=$BASEDIR/xmloutput
 #############################################################################
 
 # Removing unused files
-rm "$BASEDIR"/newids
-rm "$BASEDIR"/sortedidlist
+rm -f "$BASEDIR"/newids
+rm -f "$BASEDIR"/sortedidlist
 
 if [ -z "$1" ]; then
     echo "Need directory to read PDF files from!"
@@ -96,8 +96,9 @@ now=$(date +'%Y-%m-%d')
 
 # this file does not seem to be created so we'll cmpy/move it only if it exists
 if [ -f "$BASEDIR/declarationids-"$now ]; then
-	if [ -d 
-	mkdir -p "$BASEDIR/archive/declarationids"
+	if [ -d "$BASEDIR/archive/declarationids" ]; then
+		mkdir -p "$BASEDIR/archive/declarationids"
+	fi
 	cp "$BASEDIR/declarationids-"$now "$BASEDIR/archive/declarationids/"
 	mv -f "$BASEDIR/declarationids-"$now "$BASEDIR/currentdeclarationids"
 fi
