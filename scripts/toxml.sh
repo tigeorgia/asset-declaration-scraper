@@ -93,5 +93,8 @@ rm "$XML_OUTPUT"/test.xml
 
 # Archiving the new declaration ids file, and also making it the new current declaration id file, to be used for the next scraping.
 now=$(date +'%Y-%m-%d')
-cp $BASEDIR/"declarationids-"$now $BASEDIR/archive/declarationids/
-mv $BASEDIR/"declarationids-"$now $BASEDIR/"currentdeclarationids"
+mkdir -p "$BASEDIR/archive/declarationids/"
+cp "$BASEDIR/declarationids-"$now "$BASEDIR/archive/declarationids/"
+
+mkdir -p  "$BASEDIR/currentdeclarationids"
+mv "$BASEDIR/declarationids-"$now "$BASEDIR/currentdeclarationids"
