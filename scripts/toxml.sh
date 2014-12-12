@@ -96,9 +96,10 @@ now=$(date +'%Y-%m-%d')
 
 # this file does not seem to be created so we'll cmpy/move it only if it exists
 if [ -f "$BASEDIR/declarationids-"$now ]; then
-	mkdir -p "$BASEDIR/archive/declarationids/"
+	if [ -d 
+	mkdir -p "$BASEDIR/archive/declarationids"
 	cp "$BASEDIR/declarationids-"$now "$BASEDIR/archive/declarationids/"
-	mv "$BASEDIR/declarationids-"$now "$BASEDIR/currentdeclarationids"
+	mv -f "$BASEDIR/declarationids-"$now "$BASEDIR/currentdeclarationids"
 fi
 
 
