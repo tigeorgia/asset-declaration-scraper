@@ -38,6 +38,7 @@ if [ -z "$1" ]; then
     echo "Need directory to read PDF files from!"
     exit 1;
 fi
+
 if [ -z "$2" ]; then
     echo "Need directory to write XML files to!"
     exit 2;
@@ -85,7 +86,7 @@ for f in `ls $PDF/ka/*.pdf`; do
     if xmllint --noout "$XML_OUTPUT"/ka/$name.xml; then
         continue
     else
-	rm "$XML_OUTPUT"/ka/$name.xml
+		rm "$XML_OUTPUT"/ka/$name.xml
         echo "WARNING: "+$name+".xml (Georgian version) was not formed properly! It was removed automatically, to avoid any further processing problems."
     fi
 done
@@ -94,14 +95,17 @@ rm "$XML_OUTPUT"/test.xml
 # Archiving the new declaration ids file, and also making it the new current declaration id file, to be used for the next scraping.
 now=$(date +'%Y-%m-%d')
 
-# this file does not seem to be created so we'll cmpy/move it only if it exists
+# this file does not seem to be created so we'll copy/move it only if it exists
 if [ -f "$BASEDIR/declarationids-"$now ]; then
+	
 	# somehow the -p switch fails to do its check and the warning is still printed
 	if [ ! -d "$BASEDIR/archive/declarationids" ]; then
 		mkdir -p "$BASEDIR/archive/declarationids"
 	fi
+	
 	cp "$BASEDIR/declarationids-"$now "$BASEDIR/archive/declarationids/"
 	mv -f "$BASEDIR/declarationids-"$now "$BASEDIR/currentdeclarationids"
+
 fi
 
 
