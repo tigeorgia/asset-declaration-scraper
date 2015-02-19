@@ -32,7 +32,7 @@ def get_info_for_position(position_clause, year, position_desc)
 	results = $mysql.query(query)
 
 	results.each do |row|
-		positions << row['position_ka']
+		positions << "'#{row['position_ka']}'"
 	end
 
 	position_string = positions.join(',')
@@ -43,14 +43,14 @@ def get_info_for_position(position_clause, year, position_desc)
 		 and decl.submission_date <= '#{year}-12-31' \
 		 and decl.position_ka in (#{position_string}) \
 			 order by decl.position_ka;"
-
+			 
 	results = $mysql.query(query)
 
 
 	results.each do |row|
 
 		CSV.open("./public_officials_jobs_2013.csv", "a") do |csv|
-		csv << [ent['declarationid'],ent['mpname'],ent['personname'],ent['address_ka'],ent['name_ka'],ent['address_en'],ent['address_ka'],ent['partnership_en'],ent['partnership_ka'],ent['registration_en'],ent['registration_ka'],ent['period_en'],ent['period_ka'],ent['income']]
+			csv << [row['declarationid'],row['mpname'],row['personname'],row['address_ka'],row['name_ka'],row['partnership_ka'],row['registration_ka'],row['period_ka'],row['income']]
 		end	
 		
 	end
