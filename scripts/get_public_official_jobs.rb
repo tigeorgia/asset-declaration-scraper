@@ -26,6 +26,7 @@ $mysql = Mysql2::Client.new(:host => db_config["host"], :port => db_config["port
 
 def get_info_for_position(position_clause, year, position_desc)
 
+=begin
 	positions = []
 	query = "select distinct(position_ka) from declarations where submission_date >= '#{year}-01-01' and submission_date <= '#{year}-12-31' and position_ka #{position_clause};"
 
@@ -36,13 +37,13 @@ def get_info_for_position(position_clause, year, position_desc)
 	end
 
 	position_string = positions.join(',')
+=end
 
 	query = "SELECT decl.declaration_id as declarationid, decl.name_ka as mpname, ent.name_ka as personname, ent.address_ka, ent.partnership_ka, ent.registration_ka, ent.period_ka, ent.income from entrepreneurial_activities ent, declarations decl \
 		 where ent.declaration_id = decl.declaration_id \
 		 and decl.submission_date >= '#{year}-01-01' \
 		 and decl.submission_date <= '#{year}-12-31' \
-		 and decl.position_ka in (#{position_string}) \
-			 order by decl.position_ka;"
+		 and decl.position_ka #{position_clause};"
 			 
 	results = $mysql.query(query)
 
