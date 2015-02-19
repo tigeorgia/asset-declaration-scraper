@@ -17,16 +17,14 @@ $SCRIPTS_FOLDER/downloadpdf.sh
 # Once we have the PDF, we need to convert them into XML files
 $SCRIPTS_FOLDER/toxml.sh $PDF_OUTPUT $XML_OUTPUT
 
-# Importing data into MySQL database
-ruby $SCRIPTS_FOLDER/export-assets-declarations.rb
+# The XML files have been generated, we can now turn them into CSV files
+#$SCRIPTS_FOLDER/xmltocsv.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "main"
 
-# Creating the SQL file to update MP's profile on myparliament.ge
-ruby $SCRIPTS_FOLDER/create-sql-script.rb
+# This script create a CSV and XML files, which are a join of people's information with asset declaration ids.
+#$SCRIPTS_FOLDER/createJoinTablesFiles.sh $XML_OUTPUT $OUTPUT $ENVIRONMENT "join"
 
-if [ -f "RepresentativeTableUpdate.sql" ]; then
-    # uploads the sql file to shenmartav server, and runs it once uploaded.
-    $SCRIPTS_FOLDER/sshToShenmartavServer.sh
-fi
+# Archiving the newly downloaded and created files
+#$SCRIPTS_FOLDER/archive.sh
 
 
 echo "All done."
