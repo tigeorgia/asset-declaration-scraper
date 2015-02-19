@@ -51,7 +51,7 @@ def get_info_for_position(position_clause, year, position_desc)
 	results.each do |row|
 
 		CSV.open("./public_officials_jobs_#{year}.csv", "a") do |csv|
-			csv << [row['declarationid'],row['mpname'],row['personname'],row['address_ka'],row['name_ka'],row['partnership_ka'],row['registration_ka'],row['period_ka'],row['income']]
+			csv << [row['declarationid'],row['mpname'],row['personname'],row['address_ka'],row['partnership_ka'],row['registration_ka'],row['period_ka'],row['income']]
 		end	
 		
 	end
@@ -65,7 +65,7 @@ def get_csv_for_year (year)
 
     puts "Generating public_officials_jobs_#{year}.csv now"
 
-	CSV.open("./public_officials_jobs_#{year}.csv", "a") do |csv|
+	CSV.open("./public_officials_jobs_#{year}.csv", "w") do |csv|
 		csv << ['declaration_id','mp_name','person_name','address','partnership','registration','period','income']
 	end
 
