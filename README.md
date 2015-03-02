@@ -79,6 +79,7 @@ There are other scripts that have been written to respond to the need of various
 `ruby ./scripts/export_to_csv.rb`
 
 
+License
+-------
 
-
-
+Asset Declaration scraper is released under the terms of [GNU General Public License (V2)](http://www.gnu.org/licenses/gpl-2.0.html).
